@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/cracl/device.hpp"
+#include <cracl/device.hpp>
 
 int main(int argc, char* argv[])
 {
