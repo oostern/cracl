@@ -174,7 +174,6 @@ public:
       m_read_status = read_status::timeout;
   }
 
-  //std::vector<char> read()
   std::string read()
   {
       boost::asio::async_read_until(m_port, m_buf, m_delim,
@@ -223,7 +222,6 @@ public:
           m_timer.cancel();
           m_port.cancel();
 
-          //result = "";
           break;
         }
       }
@@ -236,11 +234,8 @@ public:
     std::vector<char> result(size, 'B');
     char* data = &(result[0]);
 
-    std::cout << "in read" << std::endl;
-
     if (m_buf.size() > 0)
     {
-      std::cout << "in read, buffer not empty" << std::endl;
       std::istream is(&m_buf);
 
       size_t toRead = std::min(m_buf.size(), size);
@@ -250,13 +245,9 @@ public:
       data += toRead;
       size -= toRead;
     }
-    std::cout << result[0] << std::endl;
 
     if (size != 0)
     {
-      std::cout << "calling async read until" << std::endl;
-      std::cout << "Timeout: " << m_timeout << std::endl;
-
       boost::asio::async_read_until(m_port, m_buf, m_delim,
           boost::bind(&port::read_callback, this,
             boost::asio::placeholders::error,
@@ -270,11 +261,9 @@ public:
 
       m_read_status = read_status::ongoing;
       m_read_size = 0;
-    std::cout << result[0] << std::endl;
 
       while (true)
       {
-        std::cout << "In while loop" << std::endl;
         m_io.run_one();
 
         if (m_read_status == finalized)
@@ -297,19 +286,28 @@ public:
           break;
         }
       }
-    std::cout << result[0] << std::endl;
     }
 
     return result;
   }
 
   template <typename... Args>
+  std::string query(Args... args)
+  {
+    write(args...);
+
+    return read();
+  }
+
+  /*
+  template <typename... Args>
   std::vector<char> query(Args... args)
   {
     write(args...);
 
-    //read();
+    return read();
   }
+  */
 };
 
 } // namespace cracl
