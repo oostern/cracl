@@ -3,11 +3,12 @@
 
 #include <array>
 #include <string>
+#include <iomanip>
 
 namespace cracl
 {
 
-  std::map<std::sting, std::pair<uint8_t, std::map<std::sting, uint8_t>>>
+  std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
     msg_map = {
       { "ACK",
         { 0x05,
@@ -218,7 +219,7 @@ namespace cracl
         }
       },
       { "UPD",
-        { 0x09
+        { 0x09,
           {
             { "SOS", 0x14 }
           }
@@ -228,8 +229,13 @@ namespace cracl
 
 class ublox_8
 {
-  uint8_t s_mu = 0xb5; // μ sync character
-  uint8_t s_b  = 0x62; // b sync character
+  uint8_t mu_sync = 0xb5; // μ sync character
+  uint8_t b_sync  = 0x62; // b sync character
+
+  size_t payload_size()
+  {
+    return 0;
+  }
 
   template <typename T>
   size_t payload_size(T t)
@@ -241,6 +247,41 @@ class ublox_8
   size_t payload_size(T t, Args... args)
   {
     return sizeof (T) + payload_size(args...);
+  }
+
+  void add_payload(std::vector<uint8_t> &packet)
+  {
+    // Nothing to add to packet
+  }
+
+  // U1    unsigned char
+  // RU1_3 unsigned char binary floatign point 3 bit exp eeebbbbb
+  // I1    signed char 2's complement
+  // X1    bitfield
+  // U2    unsigned short
+  // I2    signed short
+  // X2    bitfield
+  // U4    unsigned long
+  // I4    signed long 2's complement
+  // X4    bitfield
+  // R4    IEEE 754 signle precision
+  // R8    IEEE 754 double precision
+  // CH    ASCII/ISO 8859.1 encoding
+  template <typename... Args>
+  void add_payload(std::vector<uint8_t> &packet, uint8_t x, Args... args)
+  {
+    packet.push_back(x);
+
+    add_payload(packet, args...);
+  }
+
+  template <typename... Args>
+  void add_payload(std::vector<uint8_t> &packet, uint16_t x, Args... args)
+  {
+    packet.push_back(x & 0xff);
+    packet.push_back(x >> 8);
+
+    add_payload(packet, args...);
   }
 
   /* @bring Function to compute the checksum (XOR) of NMEA messages
@@ -269,35 +310,37 @@ public:
 
   void pubx_rate(std::string nmea_type, size_t rate)
   {
-    std::string command = "$PUBX,40," + nmea_type + ",0," + std::to_string(rate)
-      + ",0,0,0,0*";
+    //std::string command = "$PUBX,40," + nmea_type + ",0," + std::to_string(rate)
+    //  + ",0,0,0,0*";
 
-    add_pubx_checksum(command);
+    //add_pubx_checksum(command);
 
-    comm->write(command);
+    //comm->write(command);
   }
 
   template <typename... Args>
-  std::string ubx_msg (std::string &msg_class, std::string &msg_id,
+  std::string ubx_msg(std::string&& msg_class, std::string&& msg_id,
     Args... args)
   {
     std::vector<uint8_t> packet = { mu_sync, b_sync,
       msg_map[msg_class].first, msg_map[msg_class].second[msg_id] };
 
-    size_t length = payload_size(args...);
+    //size_t length = payload_size(args...);
+    uint16_t length = payload_size(args...);
 
     packet.reserve(2 + length + 2);
     packet.push_back(length & 0xff);
     packet.push_back(length / 256);
 
     // Add actual payload
+    add_payload(packet, args...);
 
     uint8_t check_a = 0;
     uint8_t check_b = 0;
 
     // Start at 2 to skip sync characters
-    for (size_t i = 2; i < msg.size(); ++i)
-      check_b += (check_a += msg[i]);
+    for (size_t i = 2; i < packet.size(); ++i)
+      check_b += (check_a += packet[i]);
 
     packet.push_back(check_a);
     packet.push_back(check_b);
@@ -308,7 +351,8 @@ public:
       message << "\\x" << std::setw(2) << std::setfill('0') << std::hex
         << (int)byte;
 
-    return comm->query_hex(message.str());
+    //return comm->query_hex(message.str());
+    return message.str();
   }
 };
 
