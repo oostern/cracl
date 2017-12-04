@@ -249,37 +249,16 @@ class ublox_8
     return sizeof (T) + payload_size(args...);
   }
 
-  void add_payload(std::vector<uint8_t> &packet)
-  {
-    // Nothing to add to packet
-  }
+  void add_payload(std::vector<uint8_t> &packet) { }
 
-  // U1    unsigned char
-  // RU1_3 unsigned char binary floatign point 3 bit exp eeebbbbb
-  // I1    signed char 2's complement
-  // X1    bitfield
-  // U2    unsigned short
-  // I2    signed short
-  // X2    bitfield
-  // U4    unsigned long
-  // I4    signed long 2's complement
-  // X4    bitfield
-  // R4    IEEE 754 signle precision
-  // R8    IEEE 754 double precision
-  // CH    ASCII/ISO 8859.1 encoding
-  template <typename... Args>
-  void add_payload(std::vector<uint8_t> &packet, uint8_t x, Args... args)
+  template <typename T, typename... Args>
+  void add_payload(std::vector<uint8_t> &packet, T t, Args... args)
   {
-    packet.push_back(x);
+    unsigned char *x = reinterpret_cast<unsigned char *>(&t);
 
-    add_payload(packet, args...);
-  }
-
-  template <typename... Args>
-  void add_payload(std::vector<uint8_t> &packet, uint16_t x, Args... args)
-  {
-    packet.push_back(x & 0xff);
-    packet.push_back(x >> 8);
+    // For little endian systems, reverse loop for big endian
+    for (size_t i = 0; i < sizeof (T); ++i)
+      packet.push_back(x[i]);
 
     add_payload(packet, args...);
   }
@@ -325,20 +304,14 @@ public:
     std::vector<uint8_t> packet = { mu_sync, b_sync,
       msg_map[msg_class].first, msg_map[msg_class].second[msg_id] };
 
-    //size_t length = payload_size(args...);
     uint16_t length = payload_size(args...);
-
     packet.reserve(2 + length + 2);
-    packet.push_back(length & 0xff);
-    packet.push_back(length / 256);
 
-    // Add actual payload
-    add_payload(packet, args...);
+    add_payload(packet, length, args...);
 
     uint8_t check_a = 0;
     uint8_t check_b = 0;
 
-    // Start at 2 to skip sync characters
     for (size_t i = 2; i < packet.size(); ++i)
       check_b += (check_a += packet[i]);
 
