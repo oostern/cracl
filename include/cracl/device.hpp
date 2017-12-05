@@ -241,6 +241,62 @@ public:
 
     return result;
   }
+
+  char read_char()
+  {
+    char result = 0x00;
+    char* data = &result;
+
+    if (m_buf.size() > 0)
+    {
+      std::istream is(&m_buf);
+
+      is.read(data, 1);
+    }
+    else
+    {
+      boost::asio::async_read(m_port, boost::asio::buffer(data, 1),
+          boost::bind(&device::read_callback, this,
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred)
+          );
+
+      m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
+
+      m_timer.async_wait(boost::bind(&device::timeout_callback, this,
+            boost::asio::placeholders::error));
+
+      m_read_status = read_status::ongoing;
+      m_read_size = 0;
+
+      while (true)
+      {
+        m_io.run_one();
+
+        if (m_read_status == finalized)
+        {
+          m_timer.cancel();
+
+          break;
+        }
+        else if (m_read_status == read_status::timeout)
+        {
+          m_port.cancel();
+
+          break;
+        }
+        else if (m_read_status == error)
+        {
+          m_timer.cancel();
+          m_port.cancel();
+
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
 };
 
 } // namespace cracl
