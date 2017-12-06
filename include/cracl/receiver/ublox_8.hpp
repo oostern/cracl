@@ -225,14 +225,22 @@ std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
           { "SOS", 0x14 }
         }
       }
+    },
+    { "PUBX",
+      { 0xF1,
+        {
+          { "CONFIG", 0x41 },
+          { "POSITION", 0x00 },
+          { "RATE", 0x40 },
+          { "SVSTATUS", 0x03 },
+          { "TIME", 0x04 }
+        }
+      }
     }
   };
 
 class ublox_8 : public device
 {
-  uint8_t mu_sync = 0xb5; // μ sync character
-  uint8_t b_sync  = 0x62; // b sync character
-
   std::deque<std::string> ubx_buffer;
   std::deque<std::string> nmea_buffer;
 
@@ -253,37 +261,44 @@ class ublox_8 : public device
     return sizeof (T) + payload_size(args...);
   }
 
-  void add_payload(std::vector<uint8_t> &message) { }
+  void add_pubx_payload(std::vector<char> &message) { }
+
+  template <typename... Args>
+  void add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
+  {
+    message.push_back(',');
+
+    for (const char* ch = t; *ch != 0x00; ++ch)
+      message.push_back(*ch);
+
+    add_pubx_payload(message, args...);
+  }
 
   template <typename T, typename... Args>
-  void add_payload(std::vector<uint8_t> &message, T t, Args... args)
+  void add_pubx_payload(std::vector<char> &message, T t, Args... args)
   {
-    unsigned char *x = reinterpret_cast<unsigned char *>(&t);
+    auto temp = std::to_string(t);
+
+    message.push_back(',');
+
+    for (auto ch : temp)
+      message.push_back(ch);
+
+    add_pubx_payload(message, args...);
+  }
+
+  void add_ubx_payload(std::vector<uint8_t> &message) { }
+
+  template <typename T, typename... Args>
+  void add_ubx_payload(std::vector<uint8_t> &message, T t, Args... args)
+  {
+    uint8_t *x = reinterpret_cast<uint8_t *>(&t);
 
     // For little endian systems, reverse loop for big endian
     for (size_t i = 0; i < sizeof (T); ++i)
       message.push_back(x[i]);
 
-    add_payload(message, args...);
-  }
-
-  /* @bring Function to compute the checksum (XOR) of NMEA messages
-   *
-   * @param The message to compute the checksum on, containing both '$' and '*'
-   */
-  void add_pubx_checksum(std::string &msg)
-  {
-    uint8_t check = 0x00;
-    std::ostringstream checksum;
-
-    // Start at 1 to skip '$', stop at (n - 1) to skip '*'
-    for (size_t i = 1; i < msg.length() - 1; ++i)
-      check ^= (uint8_t)msg[i];
-
-    checksum << std::setw(2) << std::setfill('0') << std::hex << std::uppercase
-      << (int)check;
-
-    msg += checksum.str();
+    add_ubx_payload(message, args...);
   }
 
   void buffer_messages()
@@ -387,28 +402,54 @@ public:
     ubx_buffer.clear();
   }
 
-  // TODO convert to write bytes directly
-  void pubx_rate(std::string nmea_type, size_t rate)
+  template <typename... Args>
+  void pubx_send(std::string&& msg_id, Args... args)
   {
-    std::string command = "$PUBX,40," + nmea_type + ",0," + std::to_string(rate)
-      + ",0,0,0,0*";
+    uint8_t checksum = 0x00;
+    std::vector<char> message = { '$', 'P', 'U', 'B', 'X', ',' };
 
-    add_pubx_checksum(command);
+    uint8_t a = (msg_map.at("PUBX").second.at(msg_id) & 0xf0) >> 4;
+    uint8_t b = msg_map.at("PUBX").second.at(msg_id) & 0x0f;
 
-    write(command + "\r\n");
+    a += a < 0xa ? '0' : ('A' - 0xa);
+    b += b < 0xa ? '0' : ('A' - 0xa);
+
+    message.push_back(a);
+    message.push_back(b);
+
+    add_pubx_payload(message, args...);
+
+    for (size_t i = 1; i < message.size(); ++i)
+      checksum ^= (uint8_t)message[i];
+
+    a = (checksum & 0xf0) >> 4;
+    b = checksum & 0x0f;
+
+    a += a < 0xa ? '0' : ('A' - 0xa);
+    b += b < 0xa ? '0' : ('A' - 0xa);
+
+    message.push_back('*');
+
+    message.push_back(a);
+    message.push_back(b);
+
+    message.push_back('\r');
+    message.push_back('\n');
+
+    write(message);
   }
 
   template <typename... Args>
   void ubx_send(std::string&& msg_class, std::string&& msg_id,
     Args... args)
   {
-    std::vector<uint8_t> message = { mu_sync, b_sync,
-      msg_map[msg_class].first, msg_map[msg_class].second[msg_id] };
+    std::vector<uint8_t> message = { 0xb5 /*μ*/, 'b',
+      msg_map.at(msg_class).first, msg_map.at(msg_class).second.at(msg_id) };
 
     uint16_t length = payload_size(args...);
     message.reserve(2 + length + 2);
 
-    add_payload(message, length, args...);
+    add_ubx_payload(message, length, args...);
 
     uint8_t check_a = 0;
     uint8_t check_b = 0;
