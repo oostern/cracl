@@ -180,10 +180,10 @@ public:
   }
   */
 
-  std::vector<char> read(size_t size)
+  std::vector<uint8_t> read(size_t size)
   {
-    std::vector<char> result(size, 0x00);
-    char* data = &(result[0]);
+    std::vector<uint8_t> result(size, 0x00);
+    char* data = reinterpret_cast<char*> (result.data());
 
     if (m_buf.size() > 0)
     {
@@ -242,20 +242,19 @@ public:
     return result;
   }
 
-  char read_char()
+  uint8_t read_byte()
   {
-    char result = 0x00;
-    char* data = &result;
+    uint8_t result = 0x00;
 
     if (m_buf.size() > 0)
     {
       std::istream is(&m_buf);
 
-      is.read(data, 1);
+      is.read(reinterpret_cast<char*>(&result), 1);
     }
     else
     {
-      boost::asio::async_read(m_port, boost::asio::buffer(data, 1),
+      boost::asio::async_read(m_port, boost::asio::buffer(&result, 1),
           boost::bind(&device::read_callback, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred)

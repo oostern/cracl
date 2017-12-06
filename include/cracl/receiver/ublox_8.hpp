@@ -288,7 +288,7 @@ class ublox_8 : public device
 
   void buffer_messages()
   {
-    uint8_t current = read_char();
+    uint8_t current = read_byte();
 
     std::ostringstream message;
 
@@ -300,15 +300,15 @@ class ublox_8 : public device
         message << current;
 
         while (current != 0x2a)
-          message << (current = read_char());
+          message << (current = read_byte());
 
-        message << read_char() << read_char();
+        message << read_byte() << read_byte();
 
         nmea_buffer.push_back(message.str());
 
         message.clear();
         message.str("");
-        current = read_char();
+        current = read_byte();
       }
       else if (current == 0xb5)
       {
@@ -317,16 +317,16 @@ class ublox_8 : public device
 
         uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3]));
 
-        message.write(read(length).data(), length);
+        message.write(reinterpret_cast<char*> (read(length).data()), length);
 
         ubx_buffer.push_back(message.str());
 
         message.clear();
         message.str("");
-        current = read_char();
+        current = read_byte();
       }
       else
-        current = read_char();
+        current = read_byte();
   }
 
 public:
