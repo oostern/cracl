@@ -239,10 +239,76 @@ std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
     }
   };
 
+namespace ubx
+{
+
+namespace nav
+{
+
+bool status_type(std::string& message)
+{
+  return ((uint8_t)message[2] == msg_map.at("NAV").first
+      && (uint8_t)message[3] == msg_map.at("NAV").second.at("STATUS"));
+}
+
+class status
+{
+public:
+  uint32_t iTOW;
+
+  uint8_t gpsFix;
+
+  uint8_t gpsFixOk;
+  uint8_t diffSoln;
+  uint8_t wknSet;
+  uint8_t towSet;
+
+  uint8_t diffCorr;
+  uint8_t mapMatching;
+
+  uint8_t psmState;
+  uint8_t spoofDetState;
+
+  uint32_t ttff;
+  uint32_t msss;
+
+  status(std::string& message)
+  {
+    if ((uint8_t)message[2] == msg_map.at("NAV").first
+        && (uint8_t)message[3] == msg_map.at("NAV").second.at("STATUS"))
+    {
+      iTOW = (*(reinterpret_cast<uint32_t*> (&message[4])));
+
+      gpsFix = (*(reinterpret_cast<uint8_t*> (&message[8])));
+
+      gpsFixOk = (*(reinterpret_cast<uint8_t*> (&message[9])) & 0x01);
+      diffSoln = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x02) >> 1);
+      wknSet = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x04) >> 2);
+      towSet = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x08) >> 3);
+
+      diffCorr = (*(reinterpret_cast<uint8_t*> (&message[10])) & 0x01);
+      mapMatching
+        = ((*(reinterpret_cast<uint8_t*> (&message[10])) & 0xc0) >> 6);
+
+      psmState = (*(reinterpret_cast<uint8_t*> (&message[11])) & 0x03);
+      spoofDetState
+        = ((*(reinterpret_cast<uint8_t*> (&message[11])) & 0x18) >> 3);
+
+      ttff = (*(reinterpret_cast<uint32_t*> (&message[12])));
+
+      msss = (*(reinterpret_cast<uint32_t*> (&message[16])));
+    }
+  }
+};
+
+} // namespace mon
+
+} // namespace ubx
+
 class ublox_8 : public device
 {
-  std::deque<std::string> ubx_buffer;
-  std::deque<std::string> nmea_buffer;
+  std::deque<std::string> m_ubx_buffer;
+  std::deque<std::string> m_nmea_buffer;
 
   size_t payload_size()
   {
@@ -281,7 +347,7 @@ class ublox_8 : public device
 
     message.push_back(',');
 
-    for (auto ch : temp)
+    for (auto const& ch : temp)
       message.push_back(ch);
 
     add_pubx_payload(message, args...);
@@ -319,7 +385,7 @@ class ublox_8 : public device
 
         message << read_byte() << read_byte();
 
-        nmea_buffer.push_back(message.str());
+        m_nmea_buffer.push_back(message.str());
 
         message.clear();
         message.str("");
@@ -330,11 +396,13 @@ class ublox_8 : public device
         message << current;
         std::vector<uint8_t> local_buf = read(5);
 
-        uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3]));
+        uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3])) + 2;
+
+        message.write(reinterpret_cast<char*> (local_buf.data()), 5);
 
         message.write(reinterpret_cast<char*> (read(length).data()), length);
 
-        ubx_buffer.push_back(message.str());
+        m_ubx_buffer.push_back(message.str());
 
         message.clear();
         message.str("");
@@ -358,48 +426,48 @@ public:
   {
     buffer_messages();
 
-    return nmea_buffer.size();
+    return m_nmea_buffer.size();
   }
 
   size_t ubx_queued()
   {
     buffer_messages();
 
-    return ubx_buffer.size();
+    return m_ubx_buffer.size();
   }
 
   std::string fetch_nmea()
   {
-    if (nmea_buffer.empty())
+    if (m_nmea_buffer.empty())
       buffer_messages();
 
-    auto temp = nmea_buffer.front();
+    auto temp = m_nmea_buffer.front();
 
-    nmea_buffer.pop_front();
+    m_nmea_buffer.pop_front();
 
     return temp;
   }
 
   std::string fetch_ubx()
   {
-    if (ubx_buffer.empty())
+    if (m_ubx_buffer.empty())
       buffer_messages();
 
-    auto temp = ubx_buffer.front();
+    auto temp = m_ubx_buffer.front();
 
-    ubx_buffer.pop_front();
+    m_ubx_buffer.pop_front();
 
     return temp;
   }
 
   void flush_nmea()
   {
-    nmea_buffer.clear();
+    m_nmea_buffer.clear();
   }
 
   void flush_ubx()
   {
-    ubx_buffer.clear();
+    m_ubx_buffer.clear();
   }
 
   template <typename... Args>

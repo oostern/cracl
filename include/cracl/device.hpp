@@ -250,7 +250,7 @@ public:
     {
       std::istream is(&m_buf);
 
-      is.read(reinterpret_cast<char*>(&result), 1);
+      is.read(reinterpret_cast<char*> (&result), 1);
     }
     else
     {
