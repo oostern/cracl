@@ -5,39 +5,40 @@
 
 int main(int argc, char* argv[])
 {
+  cracl::ublox_8 x("/dev/ttyACM5");
 
-  auto x = cracl::ublox_8();
+  using namespace cracl;
 
+  //x.pubx_send("RATE","GLL",0,0,0,0,0,0);
+  //x.pubx_send("RATE","RMC",0,0,0,0,0,0);
+  //x.pubx_send("RATE","VTG",0,0,0,0,0,0);
+  //x.pubx_send("RATE","GSG",0,0,0,0,0,0);
+  //x.pubx_send("RATE","GSA",0,0,0,0,0,0);
+  //x.pubx_send("RATE","GSV",0,0,0,0,0,0);
+  //x.pubx_send("RATE","GGA",0,0,0,0,0,0);
+  //x.pubx_send("RATE","ZDA",0,0,0,0,0,0);
+  //x.pubx_send("CONFIG",1,"0007","0003",19200,0);
 
-  std::cout << "UBX-MON-HW\n"
-    << x.ubx_msg(std::string("MON"), std::string("HW")) << std::endl;
-  std::cout << "UBX-MON-HW2\n"
-    << x.ubx_msg(std::string("MON"), std::string("HW2")) << std::endl;
-  std::cout << "UBX-MON-VER\n"
-    << x.ubx_msg(std::string("MON"), std::string("VER")) << std::endl;
-  std::cout << "UBX-NAV-STATUS\n"
-    << x.ubx_msg(std::string("NAV"), std::string("STATUS")) << std::endl;
-  std::cout << "UBX-CFG-NMEA\n"
-    << x.ubx_msg(std::string("CFG"), std::string("NMEA")) << std::endl;
-  std::cout << "UBX-CFG-RATE\n"
-    << x.ubx_msg(std::string("CFG"), std::string("RATE")) << std::endl;
-  uint16_t rate=2000;
-  std::cout << "UBX-CFG-RATE\n"
-    << x.ubx_msg(std::string("CFG"), std::string("RATE"), rate, uint16_t(1),uint16_t(0)) << std::endl;
+  x.ubx_send("NAV", "STATUS");
+  sleep(2);
 
+  while (x.ubx_queued())
+  {
+    auto msg = x.fetch_ubx();
 
+    if (ubx::nav::status_type(msg))
+    {
+      ubx::nav::status parsed = ubx::nav::status(msg);
 
+      std::cout << "Spoof Status: ";
 
-  //std::string name = "/dev/ttyUSB0";
-  //std::string name = "/dev/ttyACM0";
-  //std::string name = "/dev/ttyACM0";
-  //cracl::port ublox(name, 9600, 100000);
-
-  //while (true)
-  //{
-  //  std::string x = ublox.read();
-
-  //  if (!x.empty())
-  //    std::cout << x <<std::endl;
-  //}
+      switch (parsed.spoofDetState)
+      {
+        case 0: std::cout << "UNKNOWN" << std::endl; break;
+        case 1: std::cout << "OKAY" << std::endl; break;
+        case 2: std::cout << "SPOOF INDICATORS" << std::endl; break;
+        case 3: std::cout << "MULTIPLE SPOOF INDICATORS" << std::endl;
+      }
+    }
+  }
 }
