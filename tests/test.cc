@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-  cracl::ublox_8 x("/dev/ttyACM5");
+  cracl::ublox_8 x("/dev/ttyACM1");
 
   using namespace cracl;
 
@@ -26,13 +26,13 @@ int main(int argc, char* argv[])
   {
     auto msg = x.fetch_ubx();
 
-    if (ubx::nav::status_type(msg))
+    if (ubx::nav::status::type(msg))
     {
       ubx::nav::status parsed = ubx::nav::status(msg);
 
       std::cout << "Spoof Status: ";
 
-      switch (parsed.spoofDetState)
+      switch (parsed.spoofDetState())
       {
         case 0: std::cout << "UNKNOWN" << std::endl; break;
         case 1: std::cout << "OKAY" << std::endl; break;

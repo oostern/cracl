@@ -245,61 +245,128 @@ namespace ubx
 namespace nav
 {
 
-bool status_type(std::vector<uint8_t>& message)
-{
-  return (message[2] == msg_map.at("NAV").first
-      && message[3] == msg_map.at("NAV").second.at("STATUS"));
-}
-
 class status
 {
+  uint32_t m_iTOW;
+
+  uint8_t m_gpsFix;
+
+  uint8_t m_gpsFixOk;
+  uint8_t m_diffSoln;
+  uint8_t m_wknSet;
+  uint8_t m_towSet;
+
+  uint8_t m_diffCorr;
+  uint8_t m_mapMatching;
+
+  uint8_t m_psmState;
+  uint8_t m_spoofDetState;
+
+  uint32_t m_ttff;
+  uint32_t m_msss;
+
 public:
-  uint32_t iTOW;
-
-  uint8_t gpsFix;
-
-  uint8_t gpsFixOk;
-  uint8_t diffSoln;
-  uint8_t wknSet;
-  uint8_t towSet;
-
-  uint8_t diffCorr;
-  uint8_t mapMatching;
-
-  uint8_t psmState;
-  uint8_t spoofDetState;
-
-  uint32_t ttff;
-  uint32_t msss;
-
   status(std::vector<uint8_t>& message)
+  {
+    update(message);
+  }
+
+  void update(std::vector<uint8_t>& message)
   {
     if (message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("STATUS"))
     {
-      iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+      m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
 
-      gpsFix = message[10];
+      m_gpsFix = message[10];
 
-      gpsFixOk = message[11] & 0x01;
-      diffSoln = message[11] >> 1 & 0x01;
-      wknSet = message[11] >> 2 & 0x01;
-      towSet = message[11] >> 3 & 0x01;
+      m_gpsFixOk = message[11] & 0x01;
+      m_diffSoln = message[11] >> 1 & 0x01;
+      m_wknSet = message[11] >> 2 & 0x01;
+      m_towSet = message[11] >> 3 & 0x01;
 
-      diffCorr = message[12] & 0x01;
-      mapMatching = message[12] >> 6 & 0x07;
+      m_diffCorr = message[12] & 0x01;
+      m_mapMatching = message[12] >> 6 & 0x07;
 
-      psmState = message[13] & 0x03;
-      spoofDetState = message[13] >> 3 & 0x03;
+      m_psmState = message[13] & 0x03;
+      m_spoofDetState = message[13] >> 3 & 0x03;
 
-      ttff = (*(reinterpret_cast<uint32_t*> (&message[14])));
+      m_ttff = (*(reinterpret_cast<uint32_t*> (&message[14])));
 
-      msss = (*(reinterpret_cast<uint32_t*> (&message[18])));
+      m_msss = (*(reinterpret_cast<uint32_t*> (&message[18])));
     }
+    else
+      throw std::runtime_error("Message type mismatch");
   }
-};
 
-} // namespace mon
+  uint32_t iTOW()
+  {
+    return m_iTOW;
+  }
+
+  uint8_t gpsFix()
+  {
+    return m_gpsFix;
+  }
+
+  uint8_t gpsFixOk()
+  {
+    return m_gpsFixOk;
+  }
+
+  uint8_t diffSoln()
+  {
+    return m_diffSoln;
+  }
+
+  uint8_t wknSet()
+  {
+    return m_wknSet;
+  }
+
+  uint8_t towSet()
+  {
+    return m_towSet;
+  }
+
+  uint8_t diffCorr()
+  {
+    return m_diffCorr;
+  }
+
+  uint8_t mapMatching()
+  {
+    return m_mapMatching;
+  }
+
+  uint8_t psmState()
+  {
+    return m_psmState;
+  }
+
+  uint8_t spoofDetState()
+  {
+    return m_spoofDetState;
+  }
+
+  uint32_t ttff()
+  {
+    return m_ttff;
+  }
+
+  uint32_t msss()
+  {
+    return m_msss;
+  }
+
+  static bool type(std::vector<uint8_t>& message)
+  {
+    return (message[2] == msg_map.at("NAV").first
+        && message[3] == msg_map.at("NAV").second.at("STATUS"));
+  }
+}; // ubx::nav::status
+
+} // namespace nav
 
 } // namespace ubx
 
