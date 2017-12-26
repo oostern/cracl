@@ -277,24 +277,24 @@ public:
     if (message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("STATUS"))
     {
-      iTOW = (*(reinterpret_cast<uint32_t*> (&message[4])));
+      iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
 
-      gpsFix = message[8];
+      gpsFix = message[10];
 
-      gpsFixOk = message[9] & 0x01;
-      diffSoln = message[9] >> 1 & 0x01;
-      wknSet = message[9] >> 2 & 0x01;
-      towSet = message[9] >> 3 & 0x01;
+      gpsFixOk = message[11] & 0x01;
+      diffSoln = message[11] >> 1 & 0x01;
+      wknSet = message[11] >> 2 & 0x01;
+      towSet = message[11] >> 3 & 0x01;
 
-      diffCorr = message[10] & 0x01;
-      mapMatching = message[10] >> 6 & 0x07;
+      diffCorr = message[12] & 0x01;
+      mapMatching = message[12] >> 6 & 0x07;
 
-      psmState = message[11] & 0x03;
-      spoofDetState = message[11] >> 3 & 0x03;
+      psmState = message[13] & 0x03;
+      spoofDetState = message[13] >> 3 & 0x03;
 
-      ttff = (*(reinterpret_cast<uint32_t*> (&message[12])));
+      ttff = (*(reinterpret_cast<uint32_t*> (&message[14])));
 
-      msss = (*(reinterpret_cast<uint32_t*> (&message[16])));
+      msss = (*(reinterpret_cast<uint32_t*> (&message[18])));
     }
   }
 };
