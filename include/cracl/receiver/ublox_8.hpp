@@ -245,10 +245,10 @@ namespace ubx
 namespace nav
 {
 
-bool status_type(std::string& message)
+bool status_type(std::vector<uint8_t>& message)
 {
-  return ((uint8_t)message[2] == msg_map.at("NAV").first
-      && (uint8_t)message[3] == msg_map.at("NAV").second.at("STATUS"));
+  return (message[2] == msg_map.at("NAV").first
+      && message[3] == msg_map.at("NAV").second.at("STATUS"));
 }
 
 class status
@@ -272,27 +272,25 @@ public:
   uint32_t ttff;
   uint32_t msss;
 
-  status(std::string& message)
+  status(std::vector<uint8_t>& message)
   {
-    if ((uint8_t)message[2] == msg_map.at("NAV").first
-        && (uint8_t)message[3] == msg_map.at("NAV").second.at("STATUS"))
+    if (message[2] == msg_map.at("NAV").first
+        && message[3] == msg_map.at("NAV").second.at("STATUS"))
     {
       iTOW = (*(reinterpret_cast<uint32_t*> (&message[4])));
 
-      gpsFix = (*(reinterpret_cast<uint8_t*> (&message[8])));
+      gpsFix = message[8];
 
-      gpsFixOk = (*(reinterpret_cast<uint8_t*> (&message[9])) & 0x01);
-      diffSoln = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x02) >> 1);
-      wknSet = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x04) >> 2);
-      towSet = ((*(reinterpret_cast<uint8_t*> (&message[9])) & 0x08) >> 3);
+      gpsFixOk = message[9] & 0x01;
+      diffSoln = message[9] >> 1 & 0x01;
+      wknSet = message[9] >> 2 & 0x01;
+      towSet = message[9] >> 3 & 0x01;
 
-      diffCorr = (*(reinterpret_cast<uint8_t*> (&message[10])) & 0x01);
-      mapMatching
-        = ((*(reinterpret_cast<uint8_t*> (&message[10])) & 0xc0) >> 6);
+      diffCorr = message[10] & 0x01;
+      mapMatching = message[10] >> 6 & 0x07;
 
-      psmState = (*(reinterpret_cast<uint8_t*> (&message[11])) & 0x03);
-      spoofDetState
-        = ((*(reinterpret_cast<uint8_t*> (&message[11])) & 0x18) >> 3);
+      psmState = message[11] & 0x03;
+      spoofDetState = message[11] >> 3 & 0x03;
 
       ttff = (*(reinterpret_cast<uint32_t*> (&message[12])));
 
@@ -307,8 +305,8 @@ public:
 
 class ublox_8 : public device
 {
-  std::deque<std::string> m_ubx_buffer;
-  std::deque<std::string> m_nmea_buffer;
+  std::deque<std::vector<uint8_t>> m_ubx_buffer;
+  std::deque<std::vector<uint8_t>> m_nmea_buffer;
 
   size_t payload_size()
   {
@@ -369,47 +367,49 @@ class ublox_8 : public device
 
   void buffer_messages()
   {
+    std::vector<uint8_t> message;
+
     uint8_t current = read_byte();
 
-    std::ostringstream message;
-
     while (true)
+    {
       if (current == 0x00)
         break;
-      else if (current == 0x24)
+      else if (current == 0x24  // $ - Start of NMEA/PUBX message
+          || current == 0x21)   // ! - Start of encapsulated NMEA message
       {
-        message << current;
+        message.push_back(current);
 
-        while (current != 0x2a)
-          message << (current = read_byte());
+        while (current != 0x2a) // * - Start of NMEA/PUBX checksum
+          message.push_back(current = read_byte());
 
-        message << read_byte() << read_byte();
+        message.push_back(read_byte());
+        message.push_back(read_byte());
 
-        m_nmea_buffer.push_back(message.str());
-
-        message.clear();
-        message.str("");
-        current = read_byte();
+        m_nmea_buffer.push_back(message);
       }
-      else if (current == 0xb5)
+      else if (current == 0xb5) // μ - Start of UBX message
       {
-        message << current;
+        message.push_back(current);
         std::vector<uint8_t> local_buf = read(5);
 
         uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3])) + 2;
 
-        message.write(reinterpret_cast<char*> (local_buf.data()), 5);
+        message.reserve(6 + length);
 
-        message.write(reinterpret_cast<char*> (read(length).data()), length);
+        message.insert(message.end(), local_buf.begin(), local_buf.end());
 
-        m_ubx_buffer.push_back(message.str());
+        local_buf = read(length);
 
-        message.clear();
-        message.str("");
-        current = read_byte();
+        message.insert(message.end(), local_buf.begin(), local_buf.end());
+
+        m_ubx_buffer.push_back(message);
       }
-      else
-        current = read_byte();
+
+      message.clear();
+
+      current = read_byte();
+    }
   }
 
 public:
@@ -436,7 +436,7 @@ public:
     return m_ubx_buffer.size();
   }
 
-  std::string fetch_nmea()
+  std::vector<uint8_t> fetch_nmea()
   {
     if (m_nmea_buffer.empty())
       buffer_messages();
@@ -448,7 +448,7 @@ public:
     return temp;
   }
 
-  std::string fetch_ubx()
+  std::vector<uint8_t> fetch_ubx()
   {
     if (m_ubx_buffer.empty())
       buffer_messages();
