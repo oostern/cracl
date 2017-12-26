@@ -1,10 +1,14 @@
 #ifndef CRACL_RECEIVER_UBLOX_HPP
 #define CRACL_RECEIVER_UBLOX_HPP
 
+#include <map>
+#include <vector>
 #include <array>
 #include <deque>
 #include <string>
 #include <iomanip>
+
+#include "../device.hpp"
 
 namespace cracl
 {
