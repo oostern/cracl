@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <cracl/device.hpp>
+#include <cracl/clock/csac.hpp>
 #include <cracl/clock/firefly.hpp>
 #include <cracl/receiver/ublox_8.hpp>
 
@@ -10,16 +11,29 @@ int main(int argc, char* argv[])
 
   ublox_8 x("/dev/ttyACM1");
   firefly g("/dev/ttyUSB0");
+  csac c("/dev/ttyUSB1");
 
-  g.write("SYNC?\r\n");
+  // Test connectioon with CSAC
+  c.write("!^\r\n");
   sleep(2);
 
-  auto res = g.read();
+  auto res = c.read();
 
   for ( auto i : res)
     std::cout << i ;
   std::cout << std::endl;
 
+  // Test connection with Firefly GPSDO
+  g.write("SYNC?\r\n");
+  sleep(2);
+
+  res = g.read();
+
+  for ( auto i : res)
+    std::cout << i ;
+  std::cout << std::endl;
+
+  // Disable/Enable NMEA messages on uBlox
   //x.pubx_send("RATE","GLL",0,0,0,0,0,0);
   //x.pubx_send("RATE","RMC",0,0,0,0,0,0);
   //x.pubx_send("RATE","VTG",0,0,0,0,0,0);
@@ -30,6 +44,7 @@ int main(int argc, char* argv[])
   //x.pubx_send("RATE","ZDA",0,0,0,0,0,0);
   //x.pubx_send("CONFIG",1,"0007","0003",19200,0);
 
+  // Test connection with uBlox
   x.ubx_send("NAV", "STATUS");
   sleep(2);
 
