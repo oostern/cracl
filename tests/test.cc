@@ -33,38 +33,29 @@ int main(int argc, char* argv[])
     std::cout << i ;
   std::cout << std::endl;
 
-  // Disable/Enable NMEA messages on uBlox
-  //x.pubx_send("RATE","GLL",0,0,0,0,0,0);
-  //x.pubx_send("RATE","RMC",0,0,0,0,0,0);
-  //x.pubx_send("RATE","VTG",0,0,0,0,0,0);
-  //x.pubx_send("RATE","GSG",0,0,0,0,0,0);
-  //x.pubx_send("RATE","GSA",0,0,0,0,0,0);
-  //x.pubx_send("RATE","GSV",0,0,0,0,0,0);
-  //x.pubx_send("RATE","GGA",0,0,0,0,0,0);
-  //x.pubx_send("RATE","ZDA",0,0,0,0,0,0);
-  //x.pubx_send("CONFIG",1,"0007","0003",19200,0);
+  // Disable NMEA messages on uBlox
+  x.disable_nmea();
 
   // Test connection with uBlox
   x.ubx_send("NAV", "STATUS");
   sleep(2);
 
-  while (x.ubx_queued())
+  auto m = x.fetch_ubx("NAV", "STATUS");
+  if (ubx::nav::status::type(m))
   {
-    auto msg = x.fetch_ubx();
+    ubx::nav::status parsed = ubx::nav::status(m);
 
-    if (ubx::nav::status::type(msg))
+    std::cout << "Spoof Status: ";
+
+    switch (parsed.spoofDetState())
     {
-      ubx::nav::status parsed = ubx::nav::status(msg);
-
-      std::cout << "Spoof Status: ";
-
-      switch (parsed.spoofDetState())
-      {
-        case 0: std::cout << "UNKNOWN" << std::endl; break;
-        case 1: std::cout << "OKAY" << std::endl; break;
-        case 2: std::cout << "SPOOF INDICATORS" << std::endl; break;
-        case 3: std::cout << "MULTIPLE SPOOF INDICATORS" << std::endl;
-      }
+      case 0: std::cout << "UNKNOWN" << std::endl; break;
+      case 1: std::cout << "OKAY" << std::endl; break;
+      case 2: std::cout << "SPOOF INDICATORS" << std::endl; break;
+      case 3: std::cout << "MULTIPLE SPOOF INDICATORS" << std::endl;
     }
   }
+
+  std::cout << "Second fetch empty?: "
+    << (x.fetch_ubx("NAV", "STATUS").empty() ? "YES" : "NO") << std::endl;
 }

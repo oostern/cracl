@@ -531,6 +531,29 @@ public:
     return temp;
   }
 
+  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id)
+  {
+    size_t i;
+    std::vector<uint8_t> temp;
+
+    if (m_ubx_buffer.empty())
+      buffer_messages();
+
+    for (i = 0; i < m_ubx_buffer.size(); ++i)
+      if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
+          && m_ubx_buffer[i][3] == msg_map.at(msg_class).second.at(msg_id))
+        break;
+
+    if (i != m_ubx_buffer.size())
+    {
+      temp = m_ubx_buffer[i];
+
+      m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
+    }
+
+    return temp;
+  }
+
   void flush_nmea()
   {
     m_nmea_buffer.clear();
@@ -600,6 +623,22 @@ public:
     message.push_back(check_b);
 
     write(message);
+  }
+
+  void disable_nmea()
+  {
+    pubx_send("RATE", "DTM", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GLL", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GNS", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GSA", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GST", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GSG", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GSV", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "GGA", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "RMC", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "VTG", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "VLW", 0, 0, 0, 0, 0, 0);
+    pubx_send("RATE", "ZDA", 0, 0, 0, 0, 0, 0);
   }
 };
 
