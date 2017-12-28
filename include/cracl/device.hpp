@@ -31,7 +31,36 @@ class device
   boost::asio::streambuf m_buf;
   boost::asio::deadline_timer m_timer;
 
-  void read_callback(const boost::system::error_code& error,
+  void read_size_callback(const boost::system::error_code& error,
+      const size_t size_transferred)
+  {
+    if (!error)
+    {
+      m_read_status = read_status::finalized;
+      m_read_size = size_transferred;
+    }
+    else
+    {
+#ifdef __APPLE__
+      if (error.value() != 45)
+#elif _WIN32
+      if (error.value() != 995)
+#else
+      if (error.value() != 125)
+#endif
+        m_read_status = read_status::error;
+#ifdef __APPLE__
+      else
+        boost::asio::async_read(m_port, boost::asio::buffer(data, size),
+            boost::bind(&device::read_size_callback, this,
+              boost::asio::placeholders::error,
+              boost::asio::placeholders::bytes_transferred)
+            );
+#endif
+    }
+  }
+
+  void read_delim_callback(const boost::system::error_code& error,
       const size_t size_transferred)
   {
     if (!error)
@@ -52,7 +81,7 @@ class device
 #ifdef __APPLE__
       else
         boost::asio::async_read_until(m_port, m_buf, m_delim,
-            boost::bind(&device::read_callback, this,
+            boost::bind(&device::read_delim_callback, this,
               boost::asio::placeholders::error,
               boost::asio::placeholders::bytes_transferred)
             );
@@ -123,62 +152,59 @@ public:
     boost::asio::write(m_port, boost::asio::buffer(data.c_str(), data.size()));
   }
 
-  /*
-  std::string read()
+  std::vector<uint8_t> read()
   {
-      boost::asio::async_read_until(m_port, m_buf, m_delim,
-          boost::bind(&device::read_callback, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred)
-          );
+    std::vector<uint8_t> result;
 
-      std::string result;
+    boost::asio::async_read_until(m_port, m_buf, m_delim,
+        boost::bind(&device::read_delim_callback, this,
+          boost::asio::placeholders::error,
+          boost::asio::placeholders::bytes_transferred)
+        );
 
-      m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
+    m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
 
-      m_timer.async_wait(boost::bind(&device::timeout_callback, this,
-            boost::asio::placeholders::error));
+    m_timer.async_wait(boost::bind(&device::timeout_callback, this,
+          boost::asio::placeholders::error));
 
-      m_read_status = read_status::ongoing;
-      m_read_size = 0;
+    m_read_status = read_status::ongoing;
+    m_read_size = 0;
 
-      while (true)
+    while (true)
+    {
+      m_io.run_one();
+
+      if (m_read_status == finalized)
       {
-        m_io.run_one();
+        m_timer.cancel();
 
-        if (m_read_status == finalized)
-        {
-          m_timer.cancel();
+        std::istream is(&m_buf);
 
-          m_read_size -= m_delim.size();
+        result.resize(m_read_size);
 
-          std::istream is(&m_buf);
+        char* data = reinterpret_cast<char*> (result.data());
 
-          result = std::string(m_read_size, '\0');
+        is.read(data, m_read_size);
 
-          is.read(&result[0], m_read_size);
-          is.ignore(m_delim.size());
-
-          break;
-        }
-        else if (m_read_status == read_status::timeout)
-        {
-          m_port.cancel();
-
-          break;
-        }
-        else if (m_read_status == error)
-        {
-          m_timer.cancel();
-          m_port.cancel();
-
-          break;
-        }
+        break;
       }
+      else if (m_read_status == read_status::timeout)
+      {
+        m_port.cancel();
+
+        break;
+      }
+      else if (m_read_status == error)
+      {
+        m_timer.cancel();
+        m_port.cancel();
+
+        break;
+      }
+    }
 
     return result;
   }
-  */
 
   std::vector<uint8_t> read(size_t size)
   {
@@ -200,7 +226,7 @@ public:
     if (size != 0)
     {
       boost::asio::async_read(m_port, boost::asio::buffer(data, size),
-          boost::bind(&device::read_callback, this,
+          boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred)
           );
@@ -255,7 +281,7 @@ public:
     else
     {
       boost::asio::async_read(m_port, boost::asio::buffer(&result, 1),
-          boost::bind(&device::read_callback, this,
+          boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred)
           );

@@ -1,13 +1,24 @@
 #include <iostream>
 
 #include <cracl/device.hpp>
+#include <cracl/clock/firefly.hpp>
 #include <cracl/receiver/ublox_8.hpp>
 
 int main(int argc, char* argv[])
 {
-  cracl::ublox_8 x("/dev/ttyACM1");
-
   using namespace cracl;
+
+  ublox_8 x("/dev/ttyACM1");
+  firefly g("/dev/ttyUSB0");
+
+  g.write("SYNC?\r\n");
+  sleep(2);
+
+  auto res = g.read();
+
+  for ( auto i : res)
+    std::cout << i ;
+  std::cout << std::endl;
 
   //x.pubx_send("RATE","GLL",0,0,0,0,0,0);
   //x.pubx_send("RATE","RMC",0,0,0,0,0,0);
