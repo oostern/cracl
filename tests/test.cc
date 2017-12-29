@@ -57,5 +57,50 @@ int main(int argc, char* argv[])
   }
 
   std::cout << "Second fetch empty?: "
-    << (x.fetch_ubx("NAV", "STATUS").empty() ? "YES" : "NO") << std::endl;
+    << (x.fetch_ubx("NAV", "STATUS").empty() ? "YES\n" : "NO\n") << std::endl;
+
+  x.ubx_send("NAV", "SAT");
+  sleep(2);
+
+  auto nav_sat = x.fetch_ubx("NAV", "SAT");
+  if (ubx::nav::sat::type(nav_sat))
+  {
+    ubx::nav::sat parsed = ubx::nav::sat(nav_sat);
+
+    std::cout << "Num SVs: " << (int)parsed.numSvs() << std::endl;
+
+    for (size_t i = 0; i < parsed.numSvs(); ++i)
+    {
+      switch (parsed.gnssId()[i])
+      {
+        case 0: std::cout << "\t    GPS "; break;
+        case 1: std::cout << "\t   SBAS "; break;
+        case 2: std::cout << "\tGalileo "; break;
+        case 3: std::cout << "\t BeiDou "; break;
+        case 4: std::cout << "\t   IMES "; break;
+        case 5: std::cout << "\t   QZSS "; break;
+        case 6: std::cout << "\tGLONASS "; break;
+      }
+
+      std::cout << (int)parsed.svId()[i]
+        << "\t\tUsed: " << (int)parsed.svUsed()[i]
+        << "\t\tCNO: " << (int)parsed.cno()[i]
+        << "\t\tResidual: " << ((int)parsed.prRes()[i] / 10.0)
+        << "\t\tQuality: ";
+
+      switch (parsed.qualityInd()[i])
+      {
+        case 0: std::cout << "No Signal "; break;
+        case 1: std::cout << "Searching"; break;
+        case 2: std::cout << "Acquired"; break;
+        case 3: std::cout << "Unusable"; break;
+        case 4: std::cout << "Locked and Time Sync"; break;
+        case 5:
+        case 6:
+        case 7: std::cout << "Carrier Locked"; break;
+      }
+
+      std::cout << std::endl;
+    }
+  }
 }

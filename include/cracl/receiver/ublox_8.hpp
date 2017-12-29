@@ -249,6 +249,223 @@ namespace ubx
 namespace nav
 {
 
+class sat
+{
+  uint32_t m_iTOW;
+
+  uint8_t m_version;
+  uint8_t m_numSvs;
+
+  std::vector<uint8_t> m_gnssId;
+  std::vector<uint8_t> m_svId;
+
+  std::vector<uint8_t> m_cno;
+
+  std::vector<int8_t> m_elev;
+  std::vector<int16_t> m_azim;
+  std::vector<int16_t> m_prRes;
+
+  std::vector<uint8_t> m_qualityInd;
+  std::vector<uint8_t> m_svUsed;
+  std::vector<uint8_t> m_health;
+  std::vector<uint8_t> m_diffCorr;
+  std::vector<uint8_t> m_smoothed;
+  std::vector<uint8_t> m_orbitSource;
+  std::vector<uint8_t> m_ephAvail;
+  std::vector<uint8_t> m_almAvail;
+  std::vector<uint8_t> m_anoAvail;
+  std::vector<uint8_t> m_aopAvail;
+  std::vector<uint8_t> m_sbasCorrUsed;
+  std::vector<uint8_t> m_rtcmCorrUsed;
+  std::vector<uint8_t> m_prCorrUsed;
+  std::vector<uint8_t> m_crCorrUsed;
+  std::vector<uint8_t> m_doCorrUsed;
+
+public:
+  sat(std::vector<uint8_t>& message)
+  {
+    update(message);
+  }
+
+  void update(std::vector<uint8_t>& message)
+  {
+    if (message[2] == msg_map.at("NAV").first
+        && message[3] == msg_map.at("NAV").second.at("SAT"))
+    {
+      size_t num_svs = (message.size() - 6 - 8) / 12;
+
+      m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+      m_version = message[10];
+      m_numSvs = message[11];
+
+      if (m_numSvs !=(message.size() - 6 - 8) / 12)
+        std::cout << "Did something wrong determining size" << std::endl;
+
+      for (size_t i = 0; i < m_numSvs; ++i)
+      {
+        m_gnssId.push_back(message[14 + (i * 12)]);
+        m_svId.push_back(message[15 + (i * 12)]);
+
+        m_cno.push_back(message[16 + (i * 12)]);
+
+        m_elev.push_back(message[17 + (i * 12)]);
+        m_azim.push_back(
+            *(reinterpret_cast<uint16_t*> (&message[18 + (i * 12)])));
+        m_prRes.push_back(
+            *(reinterpret_cast<uint16_t*> (&message[20 + (i * 12)])));
+
+        uint32_t bitfield
+          = (*(reinterpret_cast<uint32_t*> (&message[22 + (i * 12)])));
+
+        m_qualityInd.push_back(bitfield & 0x07);
+        m_svUsed.push_back(bitfield >> 3 & 0x01);
+        m_health.push_back(bitfield >> 4 & 0x03);
+        m_diffCorr.push_back(bitfield >> 6 & 0x01);
+        m_smoothed.push_back(bitfield >> 7 & 0x01);
+        m_orbitSource.push_back(bitfield >> 8 & 0x07);
+        m_ephAvail.push_back(bitfield >> 11 & 0x01);
+        m_almAvail.push_back(bitfield >> 12 & 0x01);
+        m_anoAvail.push_back(bitfield >> 13 & 0x01);
+        m_aopAvail.push_back(bitfield >> 14 & 0x01);
+        m_sbasCorrUsed.push_back(bitfield >> 16 & 0x01);
+        m_rtcmCorrUsed.push_back(bitfield >> 17 & 0x01);
+        m_prCorrUsed.push_back(bitfield >> 20 & 0x01);
+        m_crCorrUsed.push_back(bitfield >> 21 & 0x01);
+        m_doCorrUsed.push_back(bitfield >> 22 & 0x01);
+      }
+    }
+    else
+      throw std::runtime_error("Message type mismatch");
+  }
+
+  uint32_t iTOW()
+  {
+    return m_iTOW;
+  }
+
+  uint8_t version()
+  {
+    return m_version;
+  }
+
+  uint8_t numSvs()
+  {
+    return m_numSvs;
+  }
+
+  std::vector<uint8_t> gnssId()
+  {
+    return m_gnssId;
+  }
+
+  std::vector<uint8_t> svId()
+  {
+    return m_svId;
+  }
+
+  std::vector<uint8_t> cno()
+  {
+    return m_cno;
+  }
+
+  std::vector<int8_t> elev()
+  {
+    return m_elev;
+  }
+
+  std::vector<int16_t> azim()
+  {
+    return m_azim;
+  }
+
+  std::vector<int16_t> prRes()
+  {
+    return m_prRes;
+  }
+
+  std::vector<uint8_t> qualityInd()
+  {
+    return m_qualityInd;
+  }
+
+  std::vector<uint8_t> svUsed()
+  {
+    return m_svUsed;
+  }
+
+  std::vector<uint8_t> health()
+  {
+    return m_health;
+  }
+
+  std::vector<uint8_t> diffCorr()
+  {
+    return m_diffCorr;
+  }
+
+  std::vector<uint8_t> smoothed()
+  {
+    return m_smoothed;
+  }
+
+  std::vector<uint8_t> orbitSource()
+  {
+    return m_orbitSource;
+  }
+
+  std::vector<uint8_t> ephAvail()
+  {
+    return m_ephAvail;
+  }
+
+  std::vector<uint8_t> almAvail()
+  {
+    return m_almAvail;
+  }
+
+  std::vector<uint8_t> anoAvail()
+  {
+    return m_anoAvail;
+  }
+
+  std::vector<uint8_t> aopAvail()
+  {
+    return m_aopAvail;
+  }
+
+  std::vector<uint8_t> sbasCorrUsed()
+  {
+    return m_sbasCorrUsed;
+  }
+
+  std::vector<uint8_t> rtcmCorrUsed()
+  {
+    return m_rtcmCorrUsed;
+  }
+
+  std::vector<uint8_t> prCorrUsed()
+  {
+    return m_prCorrUsed;
+  }
+
+  std::vector<uint8_t> crCorrUsed()
+  {
+    return m_crCorrUsed;
+  }
+
+  std::vector<uint8_t> doCorrUsed()
+  {
+    return m_doCorrUsed;
+  }
+
+  static bool type(std::vector<uint8_t>& message)
+  {
+    return (message[2] == msg_map.at("NAV").first
+        && message[3] == msg_map.at("NAV").second.at("SAT"));
+  }
+}; // ubx::nav::sat
+
 class status
 {
   uint32_t m_iTOW;
