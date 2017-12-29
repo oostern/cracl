@@ -301,9 +301,7 @@ public:
 
   void update(std::vector<uint8_t>& message)
   {
-    if (valid_checksum(message)
-        && message[2] == msg_map.at("NAV").first
-        && message[3] == msg_map.at("NAV").second.at("SAT"))
+    if (type(message))
     {
       size_t num_svs = (message.size() - 6 - 8) / 12;
 
@@ -311,9 +309,6 @@ public:
 
       m_version = message[10];
       m_numSvs = message[11];
-
-      if (m_numSvs !=(message.size() - 6 - 8) / 12)
-        std::cout << "Did something wrong determining size" << std::endl;
 
       for (size_t i = 0; i < m_numSvs; ++i)
       {
@@ -474,7 +469,9 @@ public:
 
   static bool type(std::vector<uint8_t>& message)
   {
-    return (message[2] == msg_map.at("NAV").first
+    return (!message.empty()
+        && valid_checksum(message)
+        && message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("SAT"));
   }
 }; // ubx::nav::sat
@@ -507,9 +504,7 @@ public:
 
   void update(std::vector<uint8_t>& message)
   {
-    if (valid_checksum(message)
-        && message[2] == msg_map.at("NAV").first
-        && message[3] == msg_map.at("NAV").second.at("STATUS"))
+    if (type(message))
     {
       m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
 
@@ -596,7 +591,9 @@ public:
 
   static bool type(std::vector<uint8_t>& message)
   {
-    return (message[2] == msg_map.at("NAV").first
+    return (!message.empty()
+        && valid_checksum(message)
+        && message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("STATUS"));
   }
 }; // ubx::nav::status
