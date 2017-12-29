@@ -246,6 +246,18 @@ std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
 namespace ubx
 {
 
+bool valid_checksum(std::vector<uint8_t>& message)
+{
+  size_t i;
+  uint8_t check_a = 0;
+  uint8_t check_b = 0;
+
+  for (i = 2; i < message.size() - 2; ++i)
+    check_b += (check_a += message[i]);
+
+  return (check_a == message[i] && check_b == message[i + 1]);
+}
+
 namespace nav
 {
 
@@ -289,7 +301,8 @@ public:
 
   void update(std::vector<uint8_t>& message)
   {
-    if (message[2] == msg_map.at("NAV").first
+    if (valid_checksum(message)
+        && message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("SAT"))
     {
       size_t num_svs = (message.size() - 6 - 8) / 12;
@@ -494,7 +507,8 @@ public:
 
   void update(std::vector<uint8_t>& message)
   {
-    if (message[2] == msg_map.at("NAV").first
+    if (valid_checksum(message)
+        && message[2] == msg_map.at("NAV").first
         && message[3] == msg_map.at("NAV").second.at("STATUS"))
     {
       m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
