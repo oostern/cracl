@@ -16,7 +16,8 @@ std::array<size_t, 5> gpsdo_baud{ 9600, 19200, 38400, 57600, 115200 };
 class firefly : public device
 {
 public:
-  //std::deque<std::vector<uint8_t>> m_nmea_buffer;
+  std::deque<std::vector<uint8_t>> m_nmea_buffer;
+  std::deque<std::vector<uint8_t>> m_scpi_buffer;
 
   //void add_pubx_payload(std::vector<char> &message) { }
 
@@ -147,9 +148,6 @@ public:
 
   /* @brief Function to query the configuration, position, speed, height, and
    *        other relevant data of the integrated GPS receiver
-   *
-   * @return void Configuration, position, speed, height, and other
-   *         relevant data
    */
   void gps()
   {
@@ -157,10 +155,6 @@ public:
   }
 
   /* @brief Function to query the number of tracked satellites
-   *
-   * TODO: convert to size_t
-   *
-   * @return void The number of tracked satellites
    */
   void gps_sat_tra_coun()
   {
@@ -169,23 +163,19 @@ public:
 
   /* @brief Function to query the number of SV's which should be visible per the
    *        almanac
-   *
-   * TODO: convert to size_t
-   *
-   * @return void The number of visible SV's per the almanac
    */
   void gps_sat_vis_coun()
   {
     write("GPS:SAT:VIS:COUN?");
   }
 
-  /* @brief Function to instruct the GPSDO to transmit GPGGA NEMA messages at a
+  /* @brief Function to instruct the GPSDO to transmit GPGGA NMEA messages at a
    *        specified frequency (0:off)
    *
    * Note that this command is disabled during the first 4 minutes of GPSDO
    * operation
    *
-   * @param freq The frequency in seconds (0,255) at which GPGGA NEMA messages
+   * @param freq The frequency in seconds (0,255) at which GPGGA NMEA messages
    *        should be output
    */
   void gps_gpgga(size_t freq)
@@ -194,7 +184,7 @@ public:
       write("GPS:GPGGA " + std::to_string(freq));
   }
 
-  /* @brief Function to instruct the GPSDO to transmit modified GPGGA NEMA
+  /* @brief Function to instruct the GPSDO to transmit modified GPGGA NMEA
    *        messages at a specified frequency (0:off)
    *
    * Messages differ from standard GPGGA messages in that they include the lock
@@ -203,7 +193,7 @@ public:
    * Note that this command is disabled during the first 7 minutes of GPSDO
    * operation
    *
-   * @param freq The frequency in seconds (0,255) at which GPGGA NEMA messages
+   * @param freq The frequency in seconds (0,255) at which GPGGA NMEA messages
    *        should be output
    */
   void gps_ggast(size_t freq)
@@ -212,13 +202,13 @@ public:
       write("GPS:GGAST " + std::to_string(freq));
   }
 
-  /* @brief Function to instruct the GPSDO to transmit GPRMC NEMA messages at a
+  /* @brief Function to instruct the GPSDO to transmit GPRMC NMEA messages at a
    *        specified frequency (0:off)
    *
    * Note that this command is disabled during the first 4 minutes of GPSDO
    * operation
    *
-   * @param freq The frequency in seconds (0,255) at which GPRMC NEMA messages
+   * @param freq The frequency in seconds (0,255) at which GPRMC NMEA messages
    *        should be output
    */
   void gps_gprmc(size_t freq)
@@ -234,7 +224,7 @@ public:
    * Note that firmware version 0.909 or above is required to support this
    * command
    *
-   * @param freq The frequency in seconds (0,255) at which GPRMC NEMA messages
+   * @param freq The frequency in seconds (0,255) at which GPRMC NMEA messages
    *        should be output
    */
   void gps_xyzsp(size_t freq)
@@ -245,31 +235,13 @@ public:
 
   /* @brief Function to return information about time, including date, time in
    *        UTC, timezone, and time shift between the GPSDO and GPS time
-   *
-   * @return void Containing date, time (UTC), timezone, and time shift
-   *         between the GPSDO and GPS time
    */
   void ptime()
   {
     write("PTIME?");
   }
 
-  //Not supported on FireFly IA
-  //
-  ///* @brief Function to get the local timezone
-  // *
-  // * @return void The timezone of the receiver
-  // */
-  //void ptim_tzon()
-  //{
-  //  write("PTIM:TZON?");
-  //}
-
   /* @brief Function to query the calendar date (UTC)
-   *
-   * TODO: should this return a date?
-   *
-   * @return void The calendar date (UTC) in year, month, day
    */
   void ptim_date()
   {
@@ -277,10 +249,6 @@ public:
   }
 
   /* @brief Function to query the current time (UTC)
-   *
-   * TODO: return a time object
-   *
-   * @return void The current UTC time
    */
   void ptim_time()
   {
@@ -289,8 +257,6 @@ public:
 
   /* @brief Function to query the current time (UTC) in a format suitable for
    *        display (colon delimeters)
-   *
-   * @return void The current UTC time with colon delimeters
    */
   void ptim_time_str()
   {
@@ -301,10 +267,6 @@ public:
    *        seconds precision)
    *
    * Note that this function is equivalent to the @sync_tint function
-   *
-   * TODO: convert to numeric return value
-   *
-   * @return void The shift between GPSDO and GPS time
    */
   void ptim_tint()
   {
@@ -315,8 +277,6 @@ public:
    *        including sync source, state, lock status, health, holdover
    *        duration, frequency error estimate, and the shift in GPSDO time
    *        from GPS time
-   *
-   * @return void The status of the synchronization system
    */
   void sync()
   {
@@ -340,11 +300,19 @@ public:
     }
   }
 
+  /* @brief Function to set the 1 PPS source to be used for synchronization
+   *        GPS  : internal GPS receiver
+   *        EXT  : external 1 PPS source
+   *        AUTO : use the internal receiver when available, fallback to EXT
+   *
+   * @param source The source to be used for synchronization
+   */
+  void sync_sour_mode(std::string&& source)
+  {
+    write("SYNC:SOUR:MODE " + source)
+  }
+
   /* @brief Function to query the synchronization source being used
-   *
-   * TODO: return enum type
-   *
-   * @return void
    */
   void sync_sour_state()
   {
@@ -352,10 +320,6 @@ public:
   }
 
   /* @brief Function to query the length of the most recent holdover duration
-   *
-   * TODO: return time object
-   *
-   * @return void The length of the most recent holdover duration
    */
   void sync_hold_dur()
   {
@@ -380,10 +344,6 @@ public:
 
   /* @brief Function to query the shift in GPSDO time from GPS time (1E-10
    *        seconds precision)
-   *
-   * TODO: return a time object
-   *
-   * @return void The shift between GPSDO and GPS time
    */
   void sync_tint()
   {
@@ -404,10 +364,6 @@ public:
    *
    * Similar to the Allan variance, a 1000s interval is measured. Values below
    * 1E-12 are considered noise
-   *
-   * TODO: return a time object
-   *
-   * @return void The frequency error estimate
    */
   void sync_fee()
   {
@@ -416,10 +372,6 @@ public:
 
   /* @brief Function to query the lock status of the PLL which controls the
    *        oscillator
-   *
-   * TODO: return a bool
-   *
-   * @return void The lock status of the oscillator (0: OFF)
    */
   void sync_lock()
   {
@@ -439,10 +391,6 @@ public:
    * 0x080 : OCXO voltage too low
    * 0x100 : short term (100s) drift > 100ns
    * 0x200 : runtime < 7min after phase-reset
-   *
-   * TODO: return hex value
-   *
-   * @return void The GPSDO health status
    */
   void sync_health()
   {
@@ -450,10 +398,6 @@ public:
   }
 
   /* @brief Function to query the electronic frequency control value in percent
-   *
-   * TODO: return a float
-   *
-   * @return void The electronic frequency control value in percent
    */
   void diag_rosc_efc_rel()
   {
@@ -462,10 +406,6 @@ public:
 
   /* @brief Function to query the electronic frequency control value in volts
    *        (0 < v < 5)
-   *
-   * TODO: return a float
-   *
-   * @return void The electronic frequency control value in volts
    */
   void diag_rosc_efc_abs()
   {
@@ -473,8 +413,6 @@ public:
   }
 
   /* @brief Function to query the system status
-   *
-   * @return void Formatted system status
    */
   void syst_stat()
   {
@@ -482,10 +420,6 @@ public:
   }
 
   /* @brief Function to check if command echo is enabled on RS-232
-   *
-   * TODO: return boolean
-   *
-   * @return void Whether or not command echo is enabled
    */
   void syst_comm_ser_echo()
   {
@@ -494,8 +428,8 @@ public:
 
   /* @brief Function to enable or disable command echo on RS-232
    *
-   * This should not be disabled as it (TODO) is used to insure the correct
-   * response is returned for a command
+   * Note: This should not be disabled as it is used when parsing messages from
+   * the Firefly
    */
   void syst_comm_ser_echo(bool state)
   {
@@ -505,10 +439,6 @@ public:
   }
 
   /* @brief Function to check of command prompt ("scpi>") is enabled
-   *
-   * TODO: return a bool
-   *
-   * @return void Whether or not command prompt is enabled
    */
   void syst_comm_ser_pro()
   {
@@ -517,8 +447,8 @@ public:
 
   /* @brief Function to enable or disable command prompt on RS-232
    *
-   * This should not be disabled as it (TODO) is used to insure the correct
-   * response is returned for a command
+   * Note: This should not be disabled as it is used when parsing messages from
+   * the Firefly
    */
   void syst_comm_ser_pro(bool state)
   {
@@ -528,10 +458,6 @@ public:
   }
 
   /* @brief Function to query current baud rate setting for device
-   *
-   * TODO: return size_t
-   *
-   * @return void The current device setting for baud rate
    */
   void syst_comm_ser_baud()
   {
@@ -544,10 +470,7 @@ public:
    * 115200. Note that the baud rate on the program side should also be adjusted
    * or communication will be lost
    *
-   * TODO: should I automatically change device baud rate? Should changing baud
-   *       rate on controller side attempt to send matching command?
-   *
-   * @param New value for baud rate
+   * @param proposed the new value for the baud rate
    */
   void syst_comm_ser_baud(size_t proposed)
   {
@@ -560,9 +483,6 @@ public:
   }
 
   /* @brief Function to query the current settings of the servo loop
-   *
-   * @return void The parameters currently in use within the servo
-   *         loop system
    */
   void serv()
   {
@@ -572,9 +492,9 @@ public:
   /* @brief Function to set the course Dac which controls the EFC. Values should
    *        be in the range [0, 255]
    *
-   * You should not need to use this function
+   * Note: You should not need to use this function
    *
-   * @param New value for coefficient
+   * @param val the new value for the coeffieicent
    */
   void serv_coarsd(size_t val)
   {
@@ -650,10 +570,6 @@ public:
   }
 
   /* @brief Function to query the GPSDO's offset to UTC
-   *
-   * TODO: convert return value to int
-   *
-   * @return the GPSDO's offset to UTC in nanoseconds
    */
   void serv_1pps()
   {
