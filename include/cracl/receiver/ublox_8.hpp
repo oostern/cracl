@@ -3,7 +3,6 @@
 
 #include <map>
 #include <vector>
-#include <array>
 #include <deque>
 #include <string>
 #include <iomanip>

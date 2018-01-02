@@ -2,6 +2,7 @@
 #define CRACL_CLOCK_FIREFLY_HPP
 
 #include <array>
+#include <deque>
 #include <string>
 
 #include "../device.hpp"
@@ -45,35 +46,50 @@ public:
   //  add_pubx_payload(message, args...);
   //}
 
-  //void buffer_messages()
-  //{
-  //  std::vector<uint8_t> message;
+  void buffer_messages()
+  {
+    std::vector<uint8_t> message;
 
-  //  uint8_t current = read_byte();
+    uint8_t current = read_byte();
 
-  //  while (true)
-  //  {
-  //    if (current == 0x00)
-  //      break;
-  //    else if (current == 0x24  // $ - Start of NMEA/PUBX message
-  //        || current == 0x21)   // ! - Start of encapsulated NMEA message
-  //    {
-  //      message.push_back(current);
+    while (true)
+    {
+      if (current == 0x00)
+        break;
+      else if (current == 0x24) // $ - Start of NMEA message
+      {
+        message.push_back(current);
 
-  //      while (current != 0x2a) // * - Start of NMEA/PUBX checksum
-  //        message.push_back(current = read_byte());
+        while (current != 0x2a) // * - Start of NMEA checksum
+          message.push_back(current = read_byte());
 
-  //      message.push_back(read_byte());
-  //      message.push_back(read_byte());
+        message.push_back(read_byte());
+        message.push_back(read_byte());
 
-  //      m_nmea_buffer.push_back(message);
-  //    }
+        m_nmea_buffer.push_back(message);
 
-  //    message.clear();
+        // Consume '\r\n'
+        read(2);
+      }
+      else
+      {
+        message.push_back(current);
 
-  //    current = read_byte();
-  //  }
-  //}
+        auto temp = read();
+
+        message.insert(message.begin() + 1, temp.begin(), temp.end());
+
+        m_scpi_buffer.push_back(message);
+
+        // Consume 'scpi > '
+        read(7);
+      }
+
+      message.clear();
+
+      current = read_byte();
+    }
+  }
 
 public:
   firefly(const std::string& location, size_t baud_rate=115200,
@@ -85,29 +101,53 @@ public:
       flow_control, stop_bits)
   { }
 
-  //size_t nmea_queued()
-  //{
-  //  buffer_messages();
+  size_t nmea_queued()
+  {
+    buffer_messages();
 
-  //  return m_nmea_buffer.size();
-  //}
+    return m_nmea_buffer.size();
+  }
 
-  //std::vector<uint8_t> fetch_nmea()
-  //{
-  //  if (m_nmea_buffer.empty())
-  //    buffer_messages();
+  size_t scpi_queued()
+  {
+    buffer_messages();
 
-  //  auto temp = m_nmea_buffer.front();
+    return m_scpi_buffer.size();
+  }
 
-  //  m_nmea_buffer.pop_front();
+  std::vector<uint8_t> fetch_nmea()
+  {
+    if (m_nmea_buffer.empty())
+      buffer_messages();
 
-  //  return temp;
-  //}
+    auto temp = m_nmea_buffer.front();
 
-  //void flush_nmea()
-  //{
-  //  m_nmea_buffer.clear();
-  //}
+    m_nmea_buffer.pop_front();
+
+    return temp;
+  }
+
+  std::vector<uint8_t> fetch_scpi()
+  {
+    if (m_scpi_buffer.empty())
+      buffer_messages();
+
+    auto temp = m_scpi_buffer.front();
+
+    m_scpi_buffer.pop_front();
+
+    return temp;
+  }
+
+  void flush_nmea()
+  {
+    m_nmea_buffer.clear();
+  }
+
+  void flush_scpi()
+  {
+    m_scpi_buffer.clear();
+  }
 
   //template <typename... Args>
   //void scpi_send(std::string&& msg_id, Args... args)
@@ -309,7 +349,7 @@ public:
    */
   void sync_sour_mode(std::string&& source)
   {
-    write("SYNC:SOUR:MODE " + source)
+    write("SYNC:SOUR:MODE " + source);
   }
 
   /* @brief Function to query the synchronization source being used
