@@ -101,8 +101,8 @@ public:
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : m_io(), m_port(m_io), m_timer(m_io), m_location(location),
-      m_timeout(timeout), m_delim(delim)
+    : m_timeout(timeout), m_location(location), m_delim(delim),
+      m_io(), m_port(m_io), m_timer(m_io)
   {
     m_port.open(m_location);
 

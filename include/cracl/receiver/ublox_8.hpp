@@ -302,8 +302,6 @@ public:
   {
     if (type(message))
     {
-      size_t num_svs = (message.size() - 6 - 8) / 12;
-
       m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
 
       m_version = message[10];
