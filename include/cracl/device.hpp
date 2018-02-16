@@ -117,6 +117,42 @@ public:
             + location));
   }
 
+  void reset()
+  {
+    port_base::baud_rate baud_rate;
+    port_base::character_size char_size;
+    port_base::parity parity;
+    port_base::flow_control flow_control;
+    port_base::stop_bits stop_bits;
+
+    m_port.get_option(baud_rate);
+    m_port.get_option(char_size);
+    m_port.get_option(parity);
+    m_port.get_option(flow_control);
+    m_port.get_option(stop_bits);
+
+    m_io.reset();
+
+    m_port.cancel();
+
+    new (&m_io) boost::asio::io_service();
+    new (&m_port) boost::asio::serial_port(m_io);
+    new (&m_buf) boost::asio::streambuf();
+    new (&m_timer) boost::asio::deadline_timer(m_io);
+
+    m_port.open(m_location);
+
+    m_port.set_option(baud_rate);
+    m_port.set_option(char_size);
+    m_port.set_option(parity);
+    m_port.set_option(flow_control);
+    m_port.set_option(stop_bits);
+
+    if (!m_port.is_open())
+      throw new std::runtime_error(std::string("Could not re-open port at: "
+            + m_location));
+  }
+
   void baud_rate(size_t baud_rate)
   {
     m_port.set_option(port_base::baud_rate(baud_rate));
