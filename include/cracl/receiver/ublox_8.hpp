@@ -12,7 +12,7 @@
 namespace cracl
 {
 
-std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
+const std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
   msg_map = {
     { "ACK",
       { 0x05,
@@ -714,8 +714,8 @@ public:
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : device (location, baud_rate, timeout, char_size, delim, parity,
-      flow_control, stop_bits)
+    : device (location, baud_rate, timeout, char_size, std::string(delim),
+      parity, flow_control, stop_bits)
   { }
 
   size_t nmea_queued()
@@ -807,7 +807,7 @@ public:
     add_pubx_payload(message, args...);
 
     for (size_t i = 1; i < message.size(); ++i)
-      checksum ^= (uint8_t)message[i];
+      checksum ^= static_cast<uint8_t>(message[i]);
 
     a = (checksum & 0xf0) >> 4;
     b = checksum & 0x0f;

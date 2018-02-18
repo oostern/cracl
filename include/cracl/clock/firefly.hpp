@@ -97,7 +97,7 @@ public:
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : device (location, baud_rate, timeout, char_size, delim, parity,
+    : device (location, baud_rate, timeout, char_size, std::move(delim), parity,
       flow_control, stop_bits)
   { }
 
@@ -473,7 +473,8 @@ public:
    */
   void syst_comm_ser_echo(bool state)
   {
-    std::string command = "SYST:COMM:SER:ECHO " + state ? "ON" : "OFF";
+    std::string command = "SYST:COMM:SER:ECHO "
+      + (state ? std::string("ON") : std::string("OFF"));
 
     write(command.c_str());
   }
@@ -492,7 +493,8 @@ public:
    */
   void syst_comm_ser_pro(bool state)
   {
-    std::string command = "SYST:COMM:SER:PRO " + state ? "ON" : "OFF";
+    std::string command = "SYST:COMM:SER:PRO "
+      + (state ? std::string("ON") : std::string("OFF"));
 
     write(command.c_str());
   }
@@ -514,8 +516,8 @@ public:
    */
   void syst_comm_ser_baud(size_t proposed)
   {
-    for (size_t i = 0; i < gpsdo_baud.size(); ++i)
-      if (proposed == gpsdo_baud[i])
+    for (uint32_t i : gpsdo_baud)
+      if (proposed == gpsdo_baud.at(i))
       {
         write("SYST:COMM:SER:BAUD");
         break;

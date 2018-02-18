@@ -1,12 +1,12 @@
 #ifndef CRACL_DEVICE_HPP
 #define CRACL_DEVICE_HPP
 
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/asio/serial_port.hpp>
+
 #include <array>
 #include <string>
-
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/serial_port.hpp>
 
 using port_base = boost::asio::serial_port_base;
 
@@ -101,7 +101,7 @@ public:
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : m_timeout(timeout), m_location(location), m_delim(delim),
+    : m_timeout(timeout), m_location(location), m_delim(std::move(delim)),
       m_io(), m_port(m_io), m_timer(m_io)
   {
     m_port.open(m_location);
@@ -113,7 +113,7 @@ public:
     m_port.set_option(port_base::stop_bits(stop_bits));
 
     if (!m_port.is_open())
-      throw new std::runtime_error(std::string("Could not open port at: "
+      throw std::runtime_error(std::string("Could not open port at: "
             + location));
   }
 
@@ -149,7 +149,7 @@ public:
     m_port.set_option(stop_bits);
 
     if (!m_port.is_open())
-      throw new std::runtime_error(std::string("Could not re-open port at: "
+      throw std::runtime_error(std::string("Could not re-open port at: "
             + m_location));
   }
 
