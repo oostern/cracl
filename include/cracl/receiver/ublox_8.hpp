@@ -260,6 +260,72 @@ bool valid_checksum(std::vector<uint8_t>& message)
 namespace nav
 {
 
+class clock
+{
+  uint32_t m_iTOW;
+
+  int32_t m_clkB;
+  int32_t m_clkD;
+
+  uint32_t m_tAcc;
+  uint32_t m_fAcc;
+
+public:
+  clock(std::vector<uint8_t>& message)
+  {
+    update(message);
+  }
+
+  void update(std::vector<uint8_t>& message)
+  {
+    if (type(message))
+    {
+      m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+      m_clkB = (*(reinterpret_cast<int32_t*> (&message[10])));
+      m_clkD = (*(reinterpret_cast<int32_t*> (&message[14])));
+
+      m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[18])));
+      m_fAcc = (*(reinterpret_cast<uint32_t*> (&message[22])));
+    }
+    else
+      throw std::runtime_error("Message type mismatch");
+  }
+
+  uint32_t iTOW()
+  {
+    return m_iTOW;
+  }
+
+  int32_t clkB()
+  {
+    return m_clkB;
+  }
+
+  int32_t clkD()
+  {
+    return m_clkD;
+  }
+
+  uint32_t tAcc()
+  {
+    return m_tAcc;
+  }
+
+  uint32_t fAcc()
+  {
+    return m_fAcc;
+  }
+
+  static bool type(std::vector<uint8_t>& message)
+  {
+    return (!message.empty()
+        && valid_checksum(message)
+        && message[2] == msg_map.at("NAV").first
+        && message[3] == msg_map.at("NAV").second.at("CLOCK"));
+  }
+}; // ubx::nav::clock
+
 class sat
 {
   uint32_t m_iTOW;
