@@ -803,7 +803,7 @@ public:
     if (m_nmea_buffer.empty())
       buffer_messages();
 
-    auto temp = m_nmea_buffer.front();
+    auto temp = std::move(m_nmea_buffer.front());
 
     m_nmea_buffer.pop_front();
 
@@ -815,7 +815,7 @@ public:
     if (m_ubx_buffer.empty())
       buffer_messages();
 
-    auto temp = m_ubx_buffer.front();
+    auto temp = std::move(m_ubx_buffer.front());
 
     m_ubx_buffer.pop_front();
 

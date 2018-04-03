@@ -120,7 +120,7 @@ public:
     if (m_nmea_buffer.empty())
       buffer_messages();
 
-    auto temp = m_nmea_buffer.front();
+    auto temp = std::move(m_nmea_buffer.front());
 
     m_nmea_buffer.pop_front();
 
@@ -132,7 +132,7 @@ public:
     if (m_scpi_buffer.empty())
       buffer_messages();
 
-    auto temp = m_scpi_buffer.front();
+    auto temp = std::move(m_scpi_buffer.front());
 
     m_scpi_buffer.pop_front();
 
