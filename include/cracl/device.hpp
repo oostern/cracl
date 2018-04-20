@@ -36,27 +36,31 @@ class device
   {
     if (!error)
     {
+      std::cout << "\033[32mcracl::device::read_size_callback() called without error\033[0m" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
+
+      m_timer.cancel();
     }
     else
     {
 #ifdef __APPLE__
-      if (error.value() != 45)
+      if (error.value() == 45)
 #elif _WIN32
-      if (error.value() != 995)
+      if (error.value() == 995)
 #else
-      if (error.value() != 125)
+      if (error.value() == 125)
 #endif
-        m_read_status = read_status::error;
-#ifdef __APPLE__
+      {
+        std::cout << "\033[33mcracl::device::read_size_callback() called with timeout error\033[0m" << std::endl;
+        m_read_status = read_status::timeout;
+      }
       else
-        boost::asio::async_read(m_port, boost::asio::buffer(data, size),
-            boost::bind(&device::read_size_callback, this,
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)
-            );
-#endif
+      {
+        std::cout << "\033[31mcracl::device::read_size_callback() called with error: "
+          << error.value() << "\033[0m" << std::endl;
+        m_read_status = read_status::error;
+      }
     }
   }
 
@@ -65,34 +69,62 @@ class device
   {
     if (!error)
     {
+      std::cout << "cracl::device::read_delim_callback() called without error" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
+
+      m_timer.cancel();
     }
     else
     {
 #ifdef __APPLE__
-      if (error.value() != 45)
+      if (error.value() == 45)
 #elif _WIN32
-      if (error.value() != 995)
+      if (error.value() == 995)
 #else
-      if (error.value() != 125)
+      if (error.value() == 125)
 #endif
-        m_read_status = read_status::error;
-#ifdef __APPLE__
+      {
+        std::cout << "cracl::device::read_delim_callback() called with timeout error" << std::endl;
+        m_read_status = read_status::timeout;
+      }
       else
-        boost::asio::async_read_until(m_port, m_buf, m_delim,
-            boost::bind(&device::read_delim_callback, this,
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)
-            );
-#endif
+      {
+        std::cout << "cracl::device::read_delim_callback() called with error: "
+          << error.value() << std::endl;
+        m_read_status = read_status::error;
+      }
     }
   }
 
   void timeout_callback(const boost::system::error_code& error)
   {
     if (!error && m_read_status == ongoing)
+    {
+      std::cout << "\033[33mcracl::device::timeout_callback() called without error\033[0m" << std::endl;
       m_read_status = read_status::timeout;
+    }
+#ifdef __APPLE__
+    else if (error.value() == 45)
+#elif _WIN32
+    else if (error.value() == 995)
+#else
+    else if (error.value() == 125)
+#endif
+    {
+      m_read_status = read_status::timeout;
+      std::cout << "\033[33mcracl::device::timeout_callback() called with timeout error\033[0m" << std::endl;
+    }
+    else if (error)
+    {
+      m_read_status = read_status::error;
+      std::cout << "\033[31mcracl::device::timeout_callback() called with error: "
+        << error.value() << "\033[0m" << std::endl;
+    }
+    else
+    {
+      std::cout << "\033[36mcracl::device::timeout_callback() called without error but read-status not ongoing\033[0m" << std::endl;
+    }
   }
 
 public:
@@ -119,38 +151,40 @@ public:
 
   void reset()
   {
-    port_base::baud_rate baud_rate;
-    port_base::character_size char_size;
-    port_base::parity parity;
-    port_base::flow_control flow_control;
-    port_base::stop_bits stop_bits;
+    std::cout << "cracl::device::reset() called but I ain't gonna do it" << std::endl;
 
-    m_port.get_option(baud_rate);
-    m_port.get_option(char_size);
-    m_port.get_option(parity);
-    m_port.get_option(flow_control);
-    m_port.get_option(stop_bits);
+    //port_base::baud_rate baud_rate;
+    //port_base::character_size char_size;
+    //port_base::parity parity;
+    //port_base::flow_control flow_control;
+    //port_base::stop_bits stop_bits;
 
-    m_io.reset();
+    //m_port.get_option(baud_rate);
+    //m_port.get_option(char_size);
+    //m_port.get_option(parity);
+    //m_port.get_option(flow_control);
+    //m_port.get_option(stop_bits);
 
-    m_port.cancel();
+    //m_io.reset();
 
-    new (&m_io) boost::asio::io_service();
-    new (&m_port) boost::asio::serial_port(m_io);
-    new (&m_buf) boost::asio::streambuf();
-    new (&m_timer) boost::asio::deadline_timer(m_io);
+    //m_port.cancel();
 
-    m_port.open(m_location);
+    //new (&m_io) boost::asio::io_service();
+    //new (&m_port) boost::asio::serial_port(m_io);
+    //new (&m_buf) boost::asio::streambuf();
+    //new (&m_timer) boost::asio::deadline_timer(m_io);
 
-    m_port.set_option(baud_rate);
-    m_port.set_option(char_size);
-    m_port.set_option(parity);
-    m_port.set_option(flow_control);
-    m_port.set_option(stop_bits);
+    //m_port.open(m_location);
 
-    if (!m_port.is_open())
-      throw std::runtime_error(std::string("Could not re-open port at: "
-            + m_location));
+    //m_port.set_option(baud_rate);
+    //m_port.set_option(char_size);
+    //m_port.set_option(parity);
+    //m_port.set_option(flow_control);
+    //m_port.set_option(stop_bits);
+
+    //if (!m_port.is_open())
+    //  throw std::runtime_error(std::string("Could not re-open port at: "
+    //        + m_location));
   }
 
   void baud_rate(size_t baud_rate)
@@ -227,13 +261,16 @@ public:
       else if (m_read_status == read_status::timeout)
       {
         m_port.cancel();
+        m_io.reset();
 
         break;
       }
       else if (m_read_status == error)
       {
         m_timer.cancel();
+
         m_port.cancel();
+        m_io.reset();
 
         break;
       }
@@ -288,13 +325,16 @@ public:
         else if (m_read_status == read_status::timeout)
         {
           m_port.cancel();
+          m_io.reset();
 
           break;
         }
         else if (m_read_status == error)
         {
           m_timer.cancel();
+
           m_port.cancel();
+          m_io.reset();
 
           break;
         }
@@ -343,13 +383,16 @@ public:
         else if (m_read_status == read_status::timeout)
         {
           m_port.cancel();
+          m_io.reset();
 
           break;
         }
         else if (m_read_status == error)
         {
           m_timer.cancel();
+
           m_port.cancel();
+          m_io.reset();
 
           break;
         }
