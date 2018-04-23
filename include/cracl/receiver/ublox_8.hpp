@@ -818,8 +818,7 @@ public:
     return temp;
   }
 
-  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id,
-      bool recurse=true)
+  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id)
   {
     size_t i;
     std::vector<uint8_t> temp;

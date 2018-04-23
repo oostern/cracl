@@ -3,11 +3,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/asio/use_future.hpp>
 #include <boost/asio/serial_port.hpp>
 
 #include <array>
-#include <future>
 #include <string>
 
 using port_base = boost::asio::serial_port_base;
