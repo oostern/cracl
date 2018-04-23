@@ -729,6 +729,7 @@ class ublox_8 : public device
 
   void buffer_messages()
   {
+    std::cout << "enetering buffer messages" << std::endl;
     std::vector<uint8_t> message;
 
     uint8_t current = read_byte();
@@ -768,8 +769,14 @@ class ublox_8 : public device
 
         message.insert(message.end(), local_buf.begin(), local_buf.end());
 
+        for (auto i : message)
+          std::cout << std::hex << std::setw(2) << (int)i << " ";
+
+        std::cout << std::dec << std::endl;
         m_ubx_buffer.push_back(message);
       }
+      else
+        std::cout << "Spinning in buffer messages" << std::endl;
 
       message.clear();
 
@@ -787,14 +794,24 @@ public:
       parity, flow_control, stop_bits)
   { }
 
-  size_t nmea_queued()
+  size_t observe_nmea_queued()
+  {
+    return m_nmea_buffer.size();
+  }
+
+  size_t observe_ubx_queued()
+  {
+    return m_ubx_buffer.size();
+  }
+
+  size_t update_nmea_queued()
   {
     buffer_messages();
 
     return m_nmea_buffer.size();
   }
 
-  size_t ubx_queued()
+  size_t update_ubx_queued()
   {
     buffer_messages();
 
@@ -825,13 +842,16 @@ public:
     return temp;
   }
 
-  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id)
+  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id,
+      bool recurse=true)
   {
     size_t i;
     std::vector<uint8_t> temp;
 
+    auto m = m_ubx_buffer.size();
     if (m_ubx_buffer.empty())
       buffer_messages();
+    std::cout << "UBX queue had " << m << " messages, buffered an additional " << (m_ubx_buffer.size() - m) << std::endl;
 
     for (i = 0; i < m_ubx_buffer.size(); ++i)
       if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
@@ -844,6 +864,13 @@ public:
 
       m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
     }
+//    else
+//    {
+//      buffer_messages();
+//
+//      return fetch_ubx(std::forward<std::string>(msg_class),
+//                       std::forward<std::string>(msg_id), false);
+//    }
 
     return temp;
   }

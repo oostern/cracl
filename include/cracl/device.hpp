@@ -3,9 +3,11 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/asio/use_future.hpp>
 #include <boost/asio/serial_port.hpp>
 
 #include <array>
+#include <future>
 #include <string>
 
 using port_base = boost::asio::serial_port_base;
@@ -17,8 +19,6 @@ enum read_status { ongoing, finalized, error, timeout };
 
 class device
 {
-  char* buffer[1024];
-
   size_t m_timeout;
   size_t m_read_size;
   read_status m_read_status;
@@ -36,11 +36,13 @@ class device
   {
     if (!error)
     {
+      m_timer.cancel();
+
       std::cout << "\033[32mcracl::device::read_size_callback() called without error\033[0m" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
 
-      m_timer.cancel();
+      std::cout << "\033[35m" << size_transferred << " bytes read\033[0m" << std::endl;
     }
     else
     {
@@ -69,11 +71,11 @@ class device
   {
     if (!error)
     {
+      m_timer.cancel();
+
       std::cout << "cracl::device::read_delim_callback() called without error" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
-
-      m_timer.cancel();
     }
     else
     {
@@ -102,7 +104,8 @@ class device
     if (!error && m_read_status == ongoing)
     {
       std::cout << "\033[33mcracl::device::timeout_callback() called without error\033[0m" << std::endl;
-      m_read_status = read_status::timeout;
+      //m_read_status = read_status::timeout;
+      m_read_status = read_status::finalized;
     }
 #ifdef __APPLE__
     else if (error.value() == 45)
@@ -112,6 +115,10 @@ class device
     else if (error.value() == 125)
 #endif
     {
+      if (m_read_status == read_status::timeout)
+        std::cout << "\ttimeout callback called with read status set to timeout" << std::endl;
+      if (m_read_status == finalized)
+        std::cout << "\ttimeout callback called with read status set to finalized" << std::endl;
       m_read_status = read_status::timeout;
       std::cout << "\033[33mcracl::device::timeout_callback() called with timeout error\033[0m" << std::endl;
     }
@@ -147,44 +154,15 @@ public:
     if (!m_port.is_open())
       throw std::runtime_error(std::string("Could not open port at: "
             + location));
+
+    std::cout << "Timeout set to " << m_timeout << "ms" << std::endl;
   }
 
   void reset()
   {
-    std::cout << "cracl::device::reset() called but I ain't gonna do it" << std::endl;
+    m_port.cancel();
 
-    //port_base::baud_rate baud_rate;
-    //port_base::character_size char_size;
-    //port_base::parity parity;
-    //port_base::flow_control flow_control;
-    //port_base::stop_bits stop_bits;
-
-    //m_port.get_option(baud_rate);
-    //m_port.get_option(char_size);
-    //m_port.get_option(parity);
-    //m_port.get_option(flow_control);
-    //m_port.get_option(stop_bits);
-
-    //m_io.reset();
-
-    //m_port.cancel();
-
-    //new (&m_io) boost::asio::io_service();
-    //new (&m_port) boost::asio::serial_port(m_io);
-    //new (&m_buf) boost::asio::streambuf();
-    //new (&m_timer) boost::asio::deadline_timer(m_io);
-
-    //m_port.open(m_location);
-
-    //m_port.set_option(baud_rate);
-    //m_port.set_option(char_size);
-    //m_port.set_option(parity);
-    //m_port.set_option(flow_control);
-    //m_port.set_option(stop_bits);
-
-    //if (!m_port.is_open())
-    //  throw std::runtime_error(std::string("Could not re-open port at: "
-    //        + m_location));
+    m_io.reset();
   }
 
   void baud_rate(size_t baud_rate)
@@ -261,7 +239,6 @@ public:
       else if (m_read_status == read_status::timeout)
       {
         m_port.cancel();
-        m_io.reset();
 
         break;
       }
@@ -270,11 +247,12 @@ public:
         m_timer.cancel();
 
         m_port.cancel();
-        m_io.reset();
 
         break;
       }
     }
+
+    m_io.reset();
 
     return result;
   }
@@ -284,8 +262,10 @@ public:
     std::vector<uint8_t> result(size, 0x00);
     char* data = reinterpret_cast<char*> (result.data());
 
+    std::cout << "\033[35mattempting to read " << size << " bytes\033[0m" << std::endl;
     if (m_buf.size() > 0)
     {
+      std::cout << "\033[35m" << m_buf.size() << " bytes on buffer at start of read\033[0m" << std::endl;
       std::istream is(&m_buf);
 
       size_t toRead = std::min(m_buf.size(), size);
@@ -298,6 +278,7 @@ public:
 
     if (size != 0)
     {
+      std::cout << "\033[35m" << size << " bytes remaining to read \033[0m" << std::endl;
       boost::asio::async_read(m_port, boost::asio::buffer(data, size),
           boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
@@ -325,7 +306,6 @@ public:
         else if (m_read_status == read_status::timeout)
         {
           m_port.cancel();
-          m_io.reset();
 
           break;
         }
@@ -334,12 +314,15 @@ public:
           m_timer.cancel();
 
           m_port.cancel();
-          m_io.reset();
 
           break;
         }
+        else
+          std::cout << "Spinning for " << size << std::endl;
       }
     }
+
+    m_io.reset();
 
     return result;
   }
@@ -347,15 +330,18 @@ public:
   uint8_t read_byte()
   {
     uint8_t result = 0x00;
+    std::cout << "\033[35mattempting to read one byte \033[0m" << std::endl;
 
     if (m_buf.size() > 0)
     {
+      std::cout << "\033[35m" << m_buf.size() << " bytes on buffer at start of read\033[0m" << std::endl;
       std::istream is(&m_buf);
 
       is.read(reinterpret_cast<char*> (&result), 1);
     }
     else
     {
+      std::cout << "\033[35mone byte remaining to read \033[0m" << std::endl;
       boost::asio::async_read(m_port, boost::asio::buffer(&result, 1),
           boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
@@ -383,7 +369,6 @@ public:
         else if (m_read_status == read_status::timeout)
         {
           m_port.cancel();
-          m_io.reset();
 
           break;
         }
@@ -392,12 +377,15 @@ public:
           m_timer.cancel();
 
           m_port.cancel();
-          m_io.reset();
 
           break;
         }
+        else
+          std::cout << "Spinning for one byte" << std::endl;
       }
     }
+
+    m_io.reset();
 
     return result;
   }
