@@ -727,9 +727,18 @@ class ublox_8 : public device
     add_ubx_payload(message, args...);
   }
 
+public:
+  ublox_8(const std::string& location, size_t baud_rate=9600,
+      size_t timeout=500, size_t char_size=8, std::string delim="\r\n",
+      port_base::parity::type parity=port_base::parity::none,
+      port_base::flow_control::type flow_control=port_base::flow_control::none,
+      port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
+    : device (location, baud_rate, timeout, char_size, std::string(delim),
+      parity, flow_control, stop_bits)
+  { }
+
   void buffer_messages()
   {
-    std::cout << "enetering buffer messages" << std::endl;
     std::vector<uint8_t> message;
 
     uint8_t current = read_byte();
@@ -762,21 +771,12 @@ class ublox_8 : public device
 
         message.insert(message.end(), local_buf.begin(), local_buf.end());
 
-        std::cout << "attempting read of " << length << " bytes" << std::endl;
-        std::cout << "\tlocal buf size before: " << local_buf.size() << std::endl;
         local_buf = read(length);
-        std::cout << "\tlocal buf size after : " << local_buf.size() << std::endl;
 
         message.insert(message.end(), local_buf.begin(), local_buf.end());
 
-        for (auto i : message)
-          std::cout << std::hex << std::setw(2) << (int)i << " ";
-
-        std::cout << std::dec << std::endl;
         m_ubx_buffer.push_back(message);
       }
-      else
-        std::cout << "Spinning in buffer messages" << std::endl;
 
       message.clear();
 
@@ -784,37 +784,13 @@ class ublox_8 : public device
     }
   }
 
-public:
-  ublox_8(const std::string& location, size_t baud_rate=9600,
-      size_t timeout=500, size_t char_size=8, std::string delim="\r\n",
-      port_base::parity::type parity=port_base::parity::none,
-      port_base::flow_control::type flow_control=port_base::flow_control::none,
-      port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : device (location, baud_rate, timeout, char_size, std::string(delim),
-      parity, flow_control, stop_bits)
-  { }
-
-  size_t observe_nmea_queued()
+  size_t nmea_queued()
   {
     return m_nmea_buffer.size();
   }
 
-  size_t observe_ubx_queued()
+  size_t ubx_queued()
   {
-    return m_ubx_buffer.size();
-  }
-
-  size_t update_nmea_queued()
-  {
-    buffer_messages();
-
-    return m_nmea_buffer.size();
-  }
-
-  size_t update_ubx_queued()
-  {
-    buffer_messages();
-
     return m_ubx_buffer.size();
   }
 
@@ -848,10 +824,8 @@ public:
     size_t i;
     std::vector<uint8_t> temp;
 
-    auto m = m_ubx_buffer.size();
     if (m_ubx_buffer.empty())
       buffer_messages();
-    std::cout << "UBX queue had " << m << " messages, buffered an additional " << (m_ubx_buffer.size() - m) << std::endl;
 
     for (i = 0; i < m_ubx_buffer.size(); ++i)
       if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
@@ -864,13 +838,6 @@ public:
 
       m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
     }
-//    else
-//    {
-//      buffer_messages();
-//
-//      return fetch_ubx(std::forward<std::string>(msg_class),
-//                       std::forward<std::string>(msg_id), false);
-//    }
 
     return temp;
   }

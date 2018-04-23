@@ -38,11 +38,8 @@ class device
     {
       m_timer.cancel();
 
-      std::cout << "\033[32mcracl::device::read_size_callback() called without error\033[0m" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
-
-      std::cout << "\033[35m" << size_transferred << " bytes read\033[0m" << std::endl;
     }
     else
     {
@@ -53,16 +50,9 @@ class device
 #else
       if (error.value() == 125)
 #endif
-      {
-        std::cout << "\033[33mcracl::device::read_size_callback() called with timeout error\033[0m" << std::endl;
         m_read_status = read_status::timeout;
-      }
       else
-      {
-        std::cout << "\033[31mcracl::device::read_size_callback() called with error: "
-          << error.value() << "\033[0m" << std::endl;
         m_read_status = read_status::error;
-      }
     }
   }
 
@@ -73,7 +63,6 @@ class device
     {
       m_timer.cancel();
 
-      std::cout << "cracl::device::read_delim_callback() called without error" << std::endl;
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
     }
@@ -86,27 +75,16 @@ class device
 #else
       if (error.value() == 125)
 #endif
-      {
-        std::cout << "cracl::device::read_delim_callback() called with timeout error" << std::endl;
         m_read_status = read_status::timeout;
-      }
       else
-      {
-        std::cout << "cracl::device::read_delim_callback() called with error: "
-          << error.value() << std::endl;
         m_read_status = read_status::error;
-      }
     }
   }
 
   void timeout_callback(const boost::system::error_code& error)
   {
     if (!error && m_read_status == ongoing)
-    {
-      std::cout << "\033[33mcracl::device::timeout_callback() called without error\033[0m" << std::endl;
-      //m_read_status = read_status::timeout;
       m_read_status = read_status::finalized;
-    }
 #ifdef __APPLE__
     else if (error.value() == 45)
 #elif _WIN32
@@ -114,24 +92,9 @@ class device
 #else
     else if (error.value() == 125)
 #endif
-    {
-      if (m_read_status == read_status::timeout)
-        std::cout << "\ttimeout callback called with read status set to timeout" << std::endl;
-      if (m_read_status == finalized)
-        std::cout << "\ttimeout callback called with read status set to finalized" << std::endl;
       m_read_status = read_status::timeout;
-      std::cout << "\033[33mcracl::device::timeout_callback() called with timeout error\033[0m" << std::endl;
-    }
     else if (error)
-    {
       m_read_status = read_status::error;
-      std::cout << "\033[31mcracl::device::timeout_callback() called with error: "
-        << error.value() << "\033[0m" << std::endl;
-    }
-    else
-    {
-      std::cout << "\033[36mcracl::device::timeout_callback() called without error but read-status not ongoing\033[0m" << std::endl;
-    }
   }
 
 public:
@@ -154,8 +117,6 @@ public:
     if (!m_port.is_open())
       throw std::runtime_error(std::string("Could not open port at: "
             + location));
-
-    std::cout << "Timeout set to " << m_timeout << "ms" << std::endl;
   }
 
   void reset()
@@ -187,12 +148,12 @@ public:
 
   void write(const std::vector<uint8_t>& data)
   {
-    boost::asio::write(m_port, boost::asio::buffer(&data[0], data.size()));
+    boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
   }
 
   void write(const std::vector<char>& data)
   {
-    boost::asio::write(m_port, boost::asio::buffer(&data[0], data.size()));
+    boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
   }
 
   void write(const std::string& data)
@@ -262,10 +223,8 @@ public:
     std::vector<uint8_t> result(size, 0x00);
     char* data = reinterpret_cast<char*> (result.data());
 
-    std::cout << "\033[35mattempting to read " << size << " bytes\033[0m" << std::endl;
     if (m_buf.size() > 0)
     {
-      std::cout << "\033[35m" << m_buf.size() << " bytes on buffer at start of read\033[0m" << std::endl;
       std::istream is(&m_buf);
 
       size_t toRead = std::min(m_buf.size(), size);
@@ -278,7 +237,6 @@ public:
 
     if (size != 0)
     {
-      std::cout << "\033[35m" << size << " bytes remaining to read \033[0m" << std::endl;
       boost::asio::async_read(m_port, boost::asio::buffer(data, size),
           boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
@@ -317,8 +275,6 @@ public:
 
           break;
         }
-        else
-          std::cout << "Spinning for " << size << std::endl;
       }
     }
 
@@ -330,18 +286,15 @@ public:
   uint8_t read_byte()
   {
     uint8_t result = 0x00;
-    std::cout << "\033[35mattempting to read one byte \033[0m" << std::endl;
 
     if (m_buf.size() > 0)
     {
-      std::cout << "\033[35m" << m_buf.size() << " bytes on buffer at start of read\033[0m" << std::endl;
       std::istream is(&m_buf);
 
       is.read(reinterpret_cast<char*> (&result), 1);
     }
     else
     {
-      std::cout << "\033[35mone byte remaining to read \033[0m" << std::endl;
       boost::asio::async_read(m_port, boost::asio::buffer(&result, 1),
           boost::bind(&device::read_size_callback, this,
             boost::asio::placeholders::error,
@@ -380,8 +333,6 @@ public:
 
           break;
         }
-        else
-          std::cout << "Spinning for one byte" << std::endl;
       }
     }
 
