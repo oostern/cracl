@@ -17,8 +17,6 @@ enum read_status { ongoing, finalized, error, timeout };
 
 class device
 {
-  char* buffer[1024];
-
   size_t m_timeout;
   size_t m_read_size;
   read_status m_read_status;
@@ -36,27 +34,23 @@ class device
   {
     if (!error)
     {
+      m_timer.cancel();
+
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
     }
     else
     {
 #ifdef __APPLE__
-      if (error.value() != 45)
+      if (error.value() == 45)
 #elif _WIN32
-      if (error.value() != 995)
+      if (error.value() == 995)
 #else
-      if (error.value() != 125)
+      if (error.value() == 125)
 #endif
-        m_read_status = read_status::error;
-#ifdef __APPLE__
+        m_read_status = read_status::timeout;
       else
-        boost::asio::async_read(m_port, boost::asio::buffer(data, size),
-            boost::bind(&device::read_size_callback, this,
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)
-            );
-#endif
+        m_read_status = read_status::error;
     }
   }
 
@@ -65,34 +59,40 @@ class device
   {
     if (!error)
     {
+      m_timer.cancel();
+
       m_read_status = read_status::finalized;
       m_read_size = size_transferred;
     }
     else
     {
 #ifdef __APPLE__
-      if (error.value() != 45)
+      if (error.value() == 45)
 #elif _WIN32
-      if (error.value() != 995)
+      if (error.value() == 995)
 #else
-      if (error.value() != 125)
+      if (error.value() == 125)
 #endif
-        m_read_status = read_status::error;
-#ifdef __APPLE__
+        m_read_status = read_status::timeout;
       else
-        boost::asio::async_read_until(m_port, m_buf, m_delim,
-            boost::bind(&device::read_delim_callback, this,
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)
-            );
-#endif
+        m_read_status = read_status::error;
     }
   }
 
   void timeout_callback(const boost::system::error_code& error)
   {
     if (!error && m_read_status == ongoing)
+      m_read_status = read_status::finalized;
+#ifdef __APPLE__
+    else if (error.value() == 45)
+#elif _WIN32
+    else if (error.value() == 995)
+#else
+    else if (error.value() == 125)
+#endif
       m_read_status = read_status::timeout;
+    else if (error)
+      m_read_status = read_status::error;
   }
 
 public:
@@ -119,38 +119,9 @@ public:
 
   void reset()
   {
-    port_base::baud_rate baud_rate;
-    port_base::character_size char_size;
-    port_base::parity parity;
-    port_base::flow_control flow_control;
-    port_base::stop_bits stop_bits;
-
-    m_port.get_option(baud_rate);
-    m_port.get_option(char_size);
-    m_port.get_option(parity);
-    m_port.get_option(flow_control);
-    m_port.get_option(stop_bits);
-
-    m_io.reset();
-
     m_port.cancel();
 
-    new (&m_io) boost::asio::io_service();
-    new (&m_port) boost::asio::serial_port(m_io);
-    new (&m_buf) boost::asio::streambuf();
-    new (&m_timer) boost::asio::deadline_timer(m_io);
-
-    m_port.open(m_location);
-
-    m_port.set_option(baud_rate);
-    m_port.set_option(char_size);
-    m_port.set_option(parity);
-    m_port.set_option(flow_control);
-    m_port.set_option(stop_bits);
-
-    if (!m_port.is_open())
-      throw std::runtime_error(std::string("Could not re-open port at: "
-            + m_location));
+    m_io.reset();
   }
 
   void baud_rate(size_t baud_rate)
@@ -175,12 +146,12 @@ public:
 
   void write(const std::vector<uint8_t>& data)
   {
-    boost::asio::write(m_port, boost::asio::buffer(&data[0], data.size()));
+    boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
   }
 
   void write(const std::vector<char>& data)
   {
-    boost::asio::write(m_port, boost::asio::buffer(&data[0], data.size()));
+    boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
   }
 
   void write(const std::string& data)
@@ -233,11 +204,14 @@ public:
       else if (m_read_status == error)
       {
         m_timer.cancel();
+
         m_port.cancel();
 
         break;
       }
     }
+
+    m_io.reset();
 
     return result;
   }
@@ -294,12 +268,15 @@ public:
         else if (m_read_status == error)
         {
           m_timer.cancel();
+
           m_port.cancel();
 
           break;
         }
       }
     }
+
+    m_io.reset();
 
     return result;
   }
@@ -349,12 +326,15 @@ public:
         else if (m_read_status == error)
         {
           m_timer.cancel();
+
           m_port.cancel();
 
           break;
         }
       }
     }
+
+    m_io.reset();
 
     return result;
   }

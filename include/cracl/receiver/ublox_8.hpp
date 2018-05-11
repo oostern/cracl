@@ -335,10 +335,10 @@ class sat
 
   std::vector<uint8_t> m_gnssId;
   std::vector<uint8_t> m_svId;
-
   std::vector<uint8_t> m_cno;
 
   std::vector<int8_t> m_elev;
+
   std::vector<int16_t> m_azim;
   std::vector<int16_t> m_prRes;
 
@@ -544,15 +544,12 @@ class status
   uint32_t m_iTOW;
 
   uint8_t m_gpsFix;
-
   uint8_t m_gpsFixOk;
   uint8_t m_diffSoln;
   uint8_t m_wknSet;
   uint8_t m_towSet;
-
   uint8_t m_diffCorr;
   uint8_t m_mapMatching;
-
   uint8_t m_psmState;
   uint8_t m_spoofDetState;
 
@@ -663,6 +660,216 @@ public:
 
 } // namespace nav
 
+namespace rxm
+{
+
+class measx
+{
+  uint8_t m_version;
+
+  uint32_t m_gpsTOW;
+  uint32_t m_gloTOW;
+  uint32_t m_bdsTOW;
+  uint32_t m_qzssTOW;
+
+  uint16_t m_gpsTOWacc;
+  uint16_t m_gloTOWacc;
+  uint16_t m_bdsTOWacc;
+  uint16_t m_qzssTOWacc;
+
+  uint8_t m_numSV;
+  uint8_t m_towSet;
+
+  std::vector<uint8_t> m_gnssId;
+  std::vector<uint8_t> m_svId;
+  std::vector<uint8_t> m_cNo;
+  std::vector<uint8_t> m_mpathIndic;
+
+  std::vector<int32_t> m_dopplerMS;
+  std::vector<int32_t> m_dopplerHz;
+
+  std::vector<uint16_t> m_wholeChips;
+  std::vector<uint16_t> m_fracChips;
+
+  std::vector<uint32_t> m_codePhase;
+
+  std::vector<uint8_t> m_intCodePhase;
+  std::vector<uint8_t> m_pseuRangeRMSErr;
+
+public:
+  measx(std::vector<uint8_t>& message)
+  {
+    update(message);
+  }
+
+  void update(std::vector<uint8_t>& message)
+  {
+    if (type(message))
+    {
+      m_version = message[6];
+
+      m_gpsTOW = (*(reinterpret_cast<uint32_t*> (&message[10])));
+      m_gloTOW = (*(reinterpret_cast<uint32_t*> (&message[14])));
+      m_bdsTOW = (*(reinterpret_cast<uint32_t*> (&message[18])));
+      m_qzssTOW = (*(reinterpret_cast<uint32_t*> (&message[36])));
+
+      m_gpsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[30])));
+      m_gloTOWacc = (*(reinterpret_cast<uint16_t*> (&message[32])));
+      m_bdsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[34])));
+      m_qzssTOWacc = (*(reinterpret_cast<uint16_t*> (&message[38])));
+
+      m_numSV = message[40];
+      m_towSet = message[41] & 0x03;
+
+      for (size_t i = 0; i < m_numSV; ++i)
+      {
+        m_gnssId.push_back(message[50 + (i * 24)]);
+        m_svId.push_back(message[51 + (i * 24)]);
+        m_cNo.push_back(message[52 + (i * 24)]);
+        m_mpathIndic.push_back(message[53 + (i * 24)]);
+
+        m_dopplerMS.push_back(
+            *(reinterpret_cast<int32_t*> (&message[54 + (i * 24)])));
+        m_dopplerHz.push_back(
+            *(reinterpret_cast<int32_t*> (&message[58 + (i * 24)])));
+
+        m_wholeChips.push_back(
+            *(reinterpret_cast<uint16_t*> (&message[62 + (i * 24)])));
+        m_fracChips.push_back(
+            *(reinterpret_cast<uint16_t*> (&message[64 + (i * 24)])));
+
+        m_codePhase.push_back(
+            *(reinterpret_cast<uint32_t*> (&message[66 + (i * 24)])));
+
+        m_intCodePhase.push_back(message[70 + (i * 24)]);
+        m_pseuRangeRMSErr.push_back(message[71 + (i * 24)]);
+      }
+    }
+    else
+      throw std::runtime_error("Message type mismatch");
+  }
+
+  uint8_t version()
+  {
+    return m_version;
+  }
+
+  uint32_t gpsTOW()
+  {
+    return m_gpsTOW;
+  }
+
+  uint32_t gloTOW()
+  {
+    return m_gloTOW;
+  }
+
+  uint32_t bdsTOW()
+  {
+    return m_bdsTOW;
+  }
+
+  uint32_t qzssTOW()
+  {
+    return m_qzssTOW;
+  }
+
+  uint16_t gpsTOWacc()
+  {
+    return m_gpsTOWacc;
+  }
+
+  uint16_t gloTOWacc()
+  {
+    return m_gloTOWacc;
+  }
+
+  uint16_t bdsTOWacc()
+  {
+    return m_bdsTOWacc;
+  }
+
+  uint16_t qzssTOWacc()
+  {
+    return m_qzssTOWacc;
+  }
+
+  uint8_t numSV()
+  {
+    return m_numSV;
+  }
+
+  uint8_t towSet()
+  {
+    return m_towSet;
+  }
+
+  std::vector<uint8_t> gnssId()
+  {
+    return m_gnssId;
+  }
+
+  std::vector<uint8_t> svId()
+  {
+    return m_svId;
+  }
+
+  std::vector<uint8_t> cNo()
+  {
+    return m_cNo;
+  }
+
+  std::vector<uint8_t> mpathIndic()
+  {
+    return m_mpathIndic;
+  }
+
+  std::vector<int32_t> dopplerMS()
+  {
+    return m_dopplerMS;
+  }
+
+  std::vector<int32_t> dopplerHz()
+  {
+    return m_dopplerHz;
+  }
+
+  std::vector<uint16_t> wholeChips()
+  {
+    return m_wholeChips;
+  }
+
+  std::vector<uint16_t> fracChips()
+  {
+    return m_fracChips;
+  }
+
+  std::vector<uint32_t> codePhase()
+  {
+    return m_codePhase;
+  }
+
+  std::vector<uint8_t> intCodePhase()
+  {
+    return m_intCodePhase;
+  }
+
+  std::vector<uint8_t> pseuRangeRMSErr()
+  {
+    return m_pseuRangeRMSErr;
+  }
+
+  static bool type(std::vector<uint8_t>& message)
+  {
+    return (!message.empty()
+        && valid_checksum(message)
+        && message[2] == msg_map.at("RXM").first
+        && message[3] == msg_map.at("RXM").second.at("MEASX"));
+  }
+}; // ubx::rxm::measx
+
+} // namespace rxm
+
 } // namespace ubx
 
 class ublox_8 : public device
@@ -727,6 +934,16 @@ class ublox_8 : public device
     add_ubx_payload(message, args...);
   }
 
+public:
+  ublox_8(const std::string& location, size_t baud_rate=9600,
+      size_t timeout=500, size_t char_size=8, std::string delim="\r\n",
+      port_base::parity::type parity=port_base::parity::none,
+      port_base::flow_control::type flow_control=port_base::flow_control::none,
+      port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
+    : device (location, baud_rate, timeout, char_size, std::string(delim),
+      parity, flow_control, stop_bits)
+  { }
+
   void buffer_messages()
   {
     std::vector<uint8_t> message;
@@ -774,27 +991,13 @@ class ublox_8 : public device
     }
   }
 
-public:
-  ublox_8(const std::string& location, size_t baud_rate=9600,
-      size_t timeout=100, size_t char_size=8, std::string delim="\r\n",
-      port_base::parity::type parity=port_base::parity::none,
-      port_base::flow_control::type flow_control=port_base::flow_control::none,
-      port_base::stop_bits::type stop_bits=port_base::stop_bits::one)
-    : device (location, baud_rate, timeout, char_size, std::string(delim),
-      parity, flow_control, stop_bits)
-  { }
-
   size_t nmea_queued()
   {
-    buffer_messages();
-
     return m_nmea_buffer.size();
   }
 
   size_t ubx_queued()
   {
-    buffer_messages();
-
     return m_ubx_buffer.size();
   }
 
