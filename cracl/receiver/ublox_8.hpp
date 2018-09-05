@@ -355,6 +355,43 @@ public:
 
 }; // ubx::nav::clock
 
+class dop
+{
+  uint32_t m_iTOW;
+
+  uint16_t m_gDOP;
+  uint16_t m_pDOP;
+  uint16_t m_tDOP;
+  uint16_t m_vDOP;
+  uint16_t m_hDOP;
+  uint16_t m_nDOP;
+  uint16_t m_eDOP;
+
+public:
+  dop(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint16_t gDOP();
+
+  uint16_t pDOP();
+
+  uint16_t tDOP();
+
+  uint16_t vDOP();
+
+  uint16_t hDOP();
+
+  uint16_t nDOP();
+
+  uint16_t eDOP();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::dop
+
 class sat
 {
   uint32_t m_iTOW;

@@ -227,6 +227,77 @@ bool clock::type(std::vector<uint8_t>& message)
       && message[3] == msg_map.at("NAV").second.at("CLOCK"));
 }
 
+dop::dop(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void dop::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_gDOP = (*(reinterpret_cast<uint16_t*> (&message[10])));
+    m_pDOP = (*(reinterpret_cast<uint16_t*> (&message[12])));
+    m_tDOP = (*(reinterpret_cast<uint16_t*> (&message[14])));
+    m_vDOP = (*(reinterpret_cast<uint16_t*> (&message[16])));
+    m_hDOP = (*(reinterpret_cast<uint16_t*> (&message[18])));
+    m_nDOP = (*(reinterpret_cast<uint16_t*> (&message[20])));
+    m_eDOP = (*(reinterpret_cast<uint16_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t dop::iTOW()
+{
+  return m_iTOW;
+}
+
+uint16_t dop::gDOP()
+{
+  return m_gDOP;
+}
+
+uint16_t dop::pDOP()
+{
+  return m_pDOP;
+}
+
+uint16_t dop::tDOP()
+{
+  return m_tDOP;
+}
+
+uint16_t dop::vDOP()
+{
+  return m_vDOP;
+}
+
+uint16_t dop::hDOP()
+{
+  return m_hDOP;
+}
+
+uint16_t dop::nDOP()
+{
+  return m_nDOP;
+}
+
+uint16_t dop::eDOP()
+{
+  return m_eDOP;
+}
+
+bool dop::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == msg_map.at("NAV").first
+      && message[3] == msg_map.at("NAV").second.at("DOP"));
+}
+
 sat::sat(std::vector<uint8_t>& message)
 {
   update(message);
