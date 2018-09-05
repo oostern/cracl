@@ -704,10 +704,10 @@ void rawx::update(std::vector<uint8_t>& message)
 
     for (size_t i = 0; i < m_numMeas; ++i)
     {
-      m_prMes.push_back(*(reinterpret_cast<double*> (&message[ + (i * 32)])));
-      m_cpMes.push_back(*(reinterpret_cast<double*> (&message[ + (i * 32)])));
+      m_prMes.push_back(*(reinterpret_cast<double*> (&message[22 + (i * 32)])));
+      m_cpMes.push_back(*(reinterpret_cast<double*> (&message[30 + (i * 32)])));
 
-      m_doMes.push_back(*(reinterpret_cast<float*> (&message[ + (i * 32)])));
+      m_doMes.push_back(*(reinterpret_cast<float*> (&message[38 + (i * 32)])));
 
       m_gnssId.push_back(message[42 + (i * 32)]);
       m_svId.push_back(message[43 + (i * 32)]);
