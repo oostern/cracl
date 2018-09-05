@@ -227,6 +227,77 @@ bool clock::type(std::vector<uint8_t>& message)
       && message[3] == msg_map.at("NAV").second.at("CLOCK"));
 }
 
+dop::dop(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void dop::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_gDOP = (*(reinterpret_cast<uint16_t*> (&message[10])));
+    m_pDOP = (*(reinterpret_cast<uint16_t*> (&message[12])));
+    m_tDOP = (*(reinterpret_cast<uint16_t*> (&message[14])));
+    m_vDOP = (*(reinterpret_cast<uint16_t*> (&message[16])));
+    m_hDOP = (*(reinterpret_cast<uint16_t*> (&message[18])));
+    m_nDOP = (*(reinterpret_cast<uint16_t*> (&message[20])));
+    m_eDOP = (*(reinterpret_cast<uint16_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t dop::iTOW()
+{
+  return m_iTOW;
+}
+
+uint16_t dop::gDOP()
+{
+  return m_gDOP;
+}
+
+uint16_t dop::pDOP()
+{
+  return m_pDOP;
+}
+
+uint16_t dop::tDOP()
+{
+  return m_tDOP;
+}
+
+uint16_t dop::vDOP()
+{
+  return m_vDOP;
+}
+
+uint16_t dop::hDOP()
+{
+  return m_hDOP;
+}
+
+uint16_t dop::nDOP()
+{
+  return m_nDOP;
+}
+
+uint16_t dop::eDOP()
+{
+  return m_eDOP;
+}
+
+bool dop::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == msg_map.at("NAV").first
+      && message[3] == msg_map.at("NAV").second.at("DOP"));
+}
+
 sat::sat(std::vector<uint8_t>& message)
 {
   update(message);
@@ -679,6 +750,155 @@ bool measx::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == msg_map.at("RXM").first
       && message[3] == msg_map.at("RXM").second.at("MEASX"));
+}
+
+rawx::rawx(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void rawx::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_rcvTow = (*(reinterpret_cast<double*> (&message[6])));
+
+    m_week = (*(reinterpret_cast<uint16_t*> (&message[14])));
+
+    m_leapS = (*(reinterpret_cast<int8_t*> (&message[16])));
+
+    m_numMeas = message[17];
+    m_recStat = message[12];
+
+    m_leapSec = m_recStat & 0x01;
+    m_clkReset = m_recStat & 0x02;
+
+    for (size_t i = 0; i < m_numMeas; ++i)
+    {
+      m_prMes.push_back(*(reinterpret_cast<double*> (&message[22 + (i * 32)])));
+      m_cpMes.push_back(*(reinterpret_cast<double*> (&message[30 + (i * 32)])));
+
+      m_doMes.push_back(*(reinterpret_cast<float*> (&message[38 + (i * 32)])));
+
+      m_gnssId.push_back(message[42 + (i * 32)]);
+      m_svId.push_back(message[43 + (i * 32)]);
+      m_freqId.push_back(message[45 + (i * 32)]);
+
+      m_locktime.push_back(
+          *(reinterpret_cast<uint16_t*> (&message[46 + (i * 32)])));
+
+      m_cno.push_back(message[48 + (i * 32)]);
+      m_prStdev.push_back(message[49 + (i * 32)]);
+      m_cpStdev.push_back(message[50 + (i * 32)]);
+      m_doStdev.push_back(message[51 + (i * 32)]);
+      m_trkStat.push_back(message[52 + (i * 32)]);
+    }
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+double rawx::rcvTow()
+{
+  return m_rcvTow;
+}
+
+uint16_t rawx::week()
+{
+  return m_week;
+}
+
+int8_t rawx::leapS()
+{
+  return m_leapS;
+}
+
+uint8_t rawx::numMeas()
+{
+  return m_numMeas;
+}
+
+uint8_t rawx::recStat()
+{
+  return m_recStat;
+}
+
+uint8_t rawx::leapSec()
+{
+  return m_leapSec;
+}
+
+uint8_t rawx::clkReset()
+{
+  return m_clkReset;
+}
+
+std::vector<double> rawx::prMes()
+{
+  return m_prMes;
+}
+
+std::vector<double> rawx::cpMes()
+{
+  return m_cpMes;
+}
+
+std::vector<float> rawx::doMes()
+{
+  return m_doMes;
+}
+
+std::vector<uint8_t> rawx::gnssId()
+{
+  return m_gnssId;
+}
+
+std::vector<uint8_t> rawx::svId()
+{
+  return m_svId;
+}
+
+std::vector<uint8_t> rawx::freqId()
+{
+  return m_freqId;
+}
+
+std::vector<uint16_t> rawx::locktime()
+{
+  return m_locktime;
+}
+
+std::vector<uint8_t> rawx::cno()
+{
+  return m_cno;
+}
+
+std::vector<uint8_t> rawx::prStdev()
+{
+  return m_prStdev;
+}
+
+std::vector<uint8_t> rawx::cpStdev()
+{
+  return m_cpStdev;
+}
+
+std::vector<uint8_t> rawx::doStdev()
+{
+  return m_doStdev;
+}
+
+std::vector<uint8_t> rawx::trkStat()
+{
+  return m_trkStat;
+}
+
+bool rawx::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == msg_map.at("RXM").first
+      && message[3] == msg_map.at("RXM").second.at("RAWX"));
 }
 
 } // namespace rxm

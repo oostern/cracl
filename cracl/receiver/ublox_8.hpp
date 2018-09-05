@@ -355,6 +355,43 @@ public:
 
 }; // ubx::nav::clock
 
+class dop
+{
+  uint32_t m_iTOW;
+
+  uint16_t m_gDOP;
+  uint16_t m_pDOP;
+  uint16_t m_tDOP;
+  uint16_t m_vDOP;
+  uint16_t m_hDOP;
+  uint16_t m_nDOP;
+  uint16_t m_eDOP;
+
+public:
+  dop(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint16_t gDOP();
+
+  uint16_t pDOP();
+
+  uint16_t tDOP();
+
+  uint16_t vDOP();
+
+  uint16_t hDOP();
+
+  uint16_t nDOP();
+
+  uint16_t eDOP();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::dop
+
 class sat
 {
   uint32_t m_iTOW;
@@ -584,6 +621,83 @@ public:
   static bool type(std::vector<uint8_t>& message);
 
 }; // ubx::rxm::measx
+
+class rawx
+{
+  double m_rcvTow;
+
+  uint16_t m_week;
+
+  int8_t m_leapS;
+
+  uint8_t m_numMeas;
+  uint8_t m_recStat;
+  uint8_t m_leapSec;
+  uint8_t m_clkReset;
+
+  std::vector<double> m_prMes;
+  std::vector<double> m_cpMes;
+
+  std::vector<float> m_doMes;
+
+  std::vector<uint8_t> m_gnssId;
+  std::vector<uint8_t> m_svId;
+  std::vector<uint8_t> m_freqId;
+
+  std::vector<uint16_t> m_locktime;
+
+  std::vector<uint8_t> m_cno;
+  std::vector<uint8_t> m_prStdev;
+  std::vector<uint8_t> m_cpStdev;
+  std::vector<uint8_t> m_doStdev;
+  std::vector<uint8_t> m_trkStat;
+
+public:
+  rawx(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  double rcvTow();
+
+  uint16_t week();
+
+  int8_t leapS();
+
+  uint8_t numMeas();
+
+  uint8_t recStat();
+
+  uint8_t leapSec();
+
+  uint8_t clkReset();
+
+  std::vector<double> prMes();
+
+  std::vector<double> cpMes();
+
+  std::vector<float> doMes();
+
+  std::vector<uint8_t> gnssId();
+
+  std::vector<uint8_t> svId();
+
+  std::vector<uint8_t> freqId();
+
+  std::vector<uint16_t> locktime();
+
+  std::vector<uint8_t> cno();
+
+  std::vector<uint8_t> prStdev();
+
+  std::vector<uint8_t> cpStdev();
+
+  std::vector<uint8_t> doStdev();
+
+  std::vector<uint8_t> trkStat();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::rxm::rawx
 
 } // namespace rxm
 
