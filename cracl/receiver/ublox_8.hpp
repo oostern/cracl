@@ -705,6 +705,7 @@ public:
 
 class ublox_8 : public device
 {
+  std::vector<uint8_t> m_local_buf;
   std::deque<std::vector<uint8_t>> m_ubx_buffer;
   std::deque<std::vector<uint8_t>> m_nmea_buffer;
 
@@ -782,7 +783,8 @@ public:
 
   std::vector<uint8_t> fetch_ubx();
 
-  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id);
+  std::vector<uint8_t> fetch_ubx(std::string&& msg_class, std::string&& msg_id,
+      bool first_try=true);
 
   void flush_nmea();
 

@@ -1,5 +1,5 @@
 CXX=g++
-CXX_FLAGS=-std=c++14 -O3 -Wall -Werror
+CXX_FLAGS=-std=c++14 -O3 -Wall -Werror -g3 -fPIC -fsanitize=address
 CXX_INCLUDE=-I /usr/include -I.
 BOOST_FLAGS=-L/usr/lib/x86_64-linux-gnu -lboost_system -lpthread -lrt
 DEPS=cracl/device.hpp cracl/clock/csac.hpp cracl/clock/firefly.hpp \

@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+ #include <thread>
+ #include <iostream>
+
 namespace cracl
 {
 
@@ -918,6 +921,7 @@ void ublox_8::buffer_messages()
 {
   std::vector<uint8_t> message;
 
+  std::cout << "\033[1;33m" << std::this_thread::get_id() << " read_byte first time \033[0m" << std::endl;
   uint8_t current = read_byte();
 
   while (true)
@@ -927,10 +931,24 @@ void ublox_8::buffer_messages()
     else if (current == 0x24  // $ - Start of NMEA/PUBX message
         || current == 0x21)   // ! - Start of encapsulated NMEA message
     {
+      std::cout << "\033[1;43m CURRENT BYTE: " << std::hex << (int) current << std::dec << std::endl;
       message.push_back(current);
 
       while (current != 0x2a) // * - Start of NMEA/PUBX checksum
-        message.push_back(current = read_byte());
+      {
+        std::cout << "\033[1;33m" << std::this_thread::get_id() << " read_byte NMEA loop \033[0m" << std::endl;
+        current = 0x00;
+        current = read_byte();
+        std::cout << "\033[1;43m WHILE BYTE: " << std::hex << (int) current << std::dec << std::endl;
+
+        if (current < 0x20)
+        {
+          std::cout << "    THATS A FUCKED UP VALUE, ABORTING NMEA PARSING" << std::endl;
+          message.push_back(current);// = read_byte());
+        }
+      }
+
+      std::cout << "\033[1;33m" << std::this_thread::get_id() << " read_byte NMEA checksums (x2) \033[0m" << std::endl;
 
       message.push_back(read_byte());
       message.push_back(read_byte());
@@ -939,24 +957,28 @@ void ublox_8::buffer_messages()
     }
     else if (current == 0xb5) // μ - Start of UBX message
     {
+      std::cout << "\033[1;33m" << std::this_thread::get_id() << "parsing ubx message \033[0m" << std::endl;
       message.push_back(current);
-      std::vector<uint8_t> local_buf = read(5);
+      std::cout << "\033[1;33m" << std::this_thread::get_id() << "  reading rest of UBX header\033[0m" << std::endl;
+      m_local_buf = read(5);
 
-      uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3])) + 2;
+      uint16_t length = *(reinterpret_cast<uint16_t *> (&m_local_buf[3])) + 2;
 
       message.reserve(6 + length);
 
-      message.insert(message.end(), local_buf.begin(), local_buf.end());
+      message.insert(message.end(), m_local_buf.begin(), m_local_buf.end());
 
-      local_buf = read(length);
+      std::cout << "\033[1;33m" << std::this_thread::get_id() << "  reading rest of UBX message\033[0m" << std::endl;
+      m_local_buf = read(length);
 
-      message.insert(message.end(), local_buf.begin(), local_buf.end());
+      message.insert(message.end(), m_local_buf.begin(), m_local_buf.end());
 
       m_ubx_buffer.push_back(message);
     }
 
     message.clear();
 
+  std::cout << "\033[1;33m" << std::this_thread::get_id() << " read_byte next message \033[0m" << std::endl;
     current = read_byte();
   }
 }
@@ -995,24 +1017,49 @@ std::vector<uint8_t> ublox_8::fetch_ubx()
   return temp;
 }
 
-std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class, std::string&& msg_id)
+std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
+    std::string&& msg_id, bool first_try)
 {
   size_t i;
   std::vector<uint8_t> temp;
 
   if (m_ubx_buffer.empty())
+  {
+    std::cout << "Buffer empty - calling buffer_messages" << std::endl;
     buffer_messages();
+  }
 
   for (i = 0; i < m_ubx_buffer.size(); ++i)
+  {
+    std::cout << "In fetch for loop" << std::endl;
     if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
         && m_ubx_buffer[i][3] == msg_map.at(msg_class).second.at(msg_id))
       break;
+  }
 
   if (i != m_ubx_buffer.size())
   {
     temp = m_ubx_buffer[i];
+    std::cout << " FOUND MESSAGE" << std::endl;
 
     m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
+  }
+  else
+  {
+    std::cout << " DIDN'T FIND MESSAGE" << std::endl;
+
+    if (m_port.is_open())
+      std::cout << "  Port still open??" << std::endl;
+    else
+      std::cout << "  Port now closed, bitch" << std::endl;
+
+    if (first_try)
+    {
+      std::cout << "   Calling buffer again" << std::endl;
+      buffer_messages();
+      return fetch_ubx(std::forward<std::string>(msg_class),
+                       std::forward<std::string>(msg_id), false);
+    }
   }
 
   return temp;
