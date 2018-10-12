@@ -35,69 +35,7 @@ device::device(const std::string& location, size_t baud_rate=115200,
           + location));
 }
 
-void device::read_byte_callback(const boost::system::error_code& error,
-    const size_t size_transferred)
-{
-  if (size_transferred != 1)
-    std::cout << "\033[1;43m" << std::this_thread::get_id() << " ERROR: size transferred for read byte is " << (int) size_transferred << "! \033[0m" << std::endl;
-
-  if (!error)
-  {
-    if (size_transferred != 1)
-      std::cout << "\033[1;33m" << std::this_thread::get_id() << " Not in error though?? \033[0m" << std::endl;
-
-    m_timer.cancel();
-
-    m_read_status = read_status::finalized;
-    m_read_size = size_transferred;
-  }
-  else
-  {
-#ifdef __APPLE__
-    if (error.value() == 45)
-#elif _WIN32
-    if (error.value() == 995)
-#else
-    if (error.value() == 125)
-#endif
-    {
-      std::cout << "\033[1;31m" << std::this_thread::get_id() << " Timeout error \033[0m" << std::endl;
-      m_read_status = read_status::timeout;
-    }
-    else
-    {
-      std::cout << "\033[1;31m" << std::this_thread::get_id() << " Some other error \033[0m" << std::endl;
-      m_read_status = read_status::error;
-    }
-  }
-}
-
-void device::read_size_callback(const boost::system::error_code& error,
-    const size_t size_transferred)
-{
-  if (!error)
-  {
-    m_timer.cancel();
-
-    m_read_status = read_status::finalized;
-    m_read_size = size_transferred;
-  }
-  else
-  {
-#ifdef __APPLE__
-    if (error.value() == 45)
-#elif _WIN32
-    if (error.value() == 995)
-#else
-    if (error.value() == 125)
-#endif
-      m_read_status = read_status::timeout;
-    else
-      m_read_status = read_status::error;
-  }
-}
-
-void device::read_delim_callback(const boost::system::error_code& error,
+void device::read_callback(const boost::system::error_code& error,
     const size_t size_transferred)
 {
   if (!error)
@@ -169,7 +107,6 @@ void device::write(const char* data, size_t size)
   std::lock_guard<std::mutex> lock(m_mutex);
 
   boost::asio::write(m_port, boost::asio::buffer(data, size));
-  //m_port.write(boost::asio::buffer(data, size));
 }
 
 void device::write(const std::vector<uint8_t>& data)
@@ -177,7 +114,6 @@ void device::write(const std::vector<uint8_t>& data)
   std::lock_guard<std::mutex> lock(m_mutex);
 
   boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
-  //m_port.write(boost::asio::buffer(data.data(), data.size()));
 }
 
 void device::write(const std::vector<char>& data)
@@ -185,7 +121,6 @@ void device::write(const std::vector<char>& data)
   std::lock_guard<std::mutex> lock(m_mutex);
 
   boost::asio::write(m_port, boost::asio::buffer(data.data(), data.size()));
-  //m_port.write(boost::asio::buffer(data.data(), data.size()));
 }
 
 void device::write(const std::string& data)
@@ -193,7 +128,6 @@ void device::write(const std::string& data)
   std::lock_guard<std::mutex> lock(m_mutex);
 
   boost::asio::write(m_port, boost::asio::buffer(data.c_str(), data.size()));
-  //m_port.write(boost::asio::buffer(data.c_str(), data.size()));
 }
 
 std::vector<uint8_t> device::read()
@@ -203,8 +137,7 @@ std::vector<uint8_t> device::read()
   m_result_vector.clear();
 
   boost::asio::async_read_until(m_port, m_buf, m_delim,
-  //m_port.async_read_until(m_buf, m_delim,
-      boost::bind(&device::read_delim_callback, this,
+      boost::bind(&device::read_callback, this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred)
       );
@@ -279,8 +212,7 @@ std::vector<uint8_t> device::read(size_t size)
   if (size != 0)
   {
     boost::asio::async_read(m_port, boost::asio::buffer(data, size),
-    //m_port.async_read(boost::asio::buffer(data, size),
-        boost::bind(&device::read_size_callback, this,
+        boost::bind(&device::read_callback, this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred)
         );
@@ -327,7 +259,6 @@ std::vector<uint8_t> device::read(size_t size)
 
 uint8_t device::read_byte()
 {
-  std::cout << "\033[1;32m" << std::this_thread::get_id() << " read_byte called \033[0m" << std::endl;
   std::lock_guard<std::mutex> lock(m_mutex);
 
   m_result_byte = 0x00;
@@ -341,8 +272,7 @@ uint8_t device::read_byte()
   else
   {
     boost::asio::async_read(m_port, boost::asio::buffer(&m_result_byte, 1),
-    //m_port.async_read(boost::asio::buffer(&result, 1),
-        boost::bind(&device::read_byte_callback, this,
+        boost::bind(&device::read_callback, this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred)
         );
@@ -367,23 +297,18 @@ uint8_t device::read_byte()
       }
       else if (m_read_status == read_status::timeout)
       {
-        std::cout << "\033[1;34m" << std::this_thread::get_id() << " Back in read_byte timeout condition \033[0m" << std::endl;
         m_port.cancel();
 
-        std::cout << "\033[1;34m" << std::this_thread::get_id() << " Port cancelled\033[0m" << std::endl;
         break;
       }
       else if (m_read_status == error)
       {
-        std::cout << "\033[1;34m" << std::this_thread::get_id() << " Back in read_byte error condition \033[0m" << std::endl;
         m_timer.cancel();
 
         m_port.cancel();
 
         break;
       }
-      else
-        std::cout << "\033[1;32m" << std::this_thread::get_id() << " spinning \033[0m" << std::endl;
     }
   }
 

@@ -36,13 +36,7 @@ protected:
   boost::asio::streambuf m_buf;
   boost::asio::deadline_timer m_timer;
 
-  void read_byte_callback(const boost::system::error_code& error,
-      const size_t size_transferred);
-
-  void read_size_callback(const boost::system::error_code& error,
-      const size_t size_transferred);
-
-  void read_delim_callback(const boost::system::error_code& error,
+  void read_callback(const boost::system::error_code& error,
       const size_t size_transferred);
 
   void timeout_callback(const boost::system::error_code& error);
