@@ -705,6 +705,7 @@ public:
 
 class ublox_8 : public device
 {
+  uint8_t m_current;
   std::vector<uint8_t> m_local_buf;
 
   std::deque<std::vector<uint8_t>> m_ubx_buffer;

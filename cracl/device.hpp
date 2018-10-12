@@ -18,7 +18,6 @@ enum read_status { ongoing, finalized, error, timeout };
 
 class device
 {
-protected:
   size_t m_timeout;
   size_t m_read_size;
   read_status m_read_status;

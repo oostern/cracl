@@ -9,9 +9,6 @@
 #include <string>
 #include <vector>
 
- #include <thread>
- #include <iostream>
-
 namespace cracl
 {
 
@@ -921,36 +918,32 @@ void ublox_8::buffer_messages()
 {
   std::vector<uint8_t> message;
 
-  std::cout << "\033[1;33m" << std::this_thread::get_id() << " read_byte first time \033[0m" << std::endl;
-  uint8_t current = read_byte();
+  m_current = read_byte();
 
   while (true)
   {
-    if (current == 0x00)
+    if (m_current == 0x00)
       break;
-    else if (current == 0x24  // $ - Start of NMEA/PUBX message
-        || current == 0x21)   // ! - Start of encapsulated NMEA message
+    else if (m_current == 0x24  // $ - Start of NMEA/PUBX message
+        || m_current == 0x21)   // ! - Start of encapsulated NMEA message
     {
-      message.push_back(current);
+      message.push_back(m_current);
 
-      while (current != 0x2a) // * - Start of NMEA/PUBX checksum
-      {
-        current = read_byte();
+                                // * - Start of NMEA/PUBX checksum
+      while (m_current >= 0x20 && m_current != 0x2a)
+          message.push_back(m_current = read_byte());
 
-        if (current < 0x20)
-          break;
-        else
-          message.push_back(current);
-      }
+      if (m_current < 0x20)
+        continue;
 
       message.push_back(read_byte());
       message.push_back(read_byte());
 
       m_nmea_buffer.push_back(message);
     }
-    else if (current == 0xb5) // μ - Start of UBX message
+    else if (m_current == 0xb5) // μ - Start of UBX message
     {
-      message.push_back(current);
+      message.push_back(m_current);
       m_local_buf = read(5);
 
       uint16_t length = *(reinterpret_cast<uint16_t *> (&m_local_buf[3])) + 2;
@@ -968,7 +961,7 @@ void ublox_8::buffer_messages()
 
     message.clear();
 
-    current = read_byte();
+    m_current = read_byte();
   }
 }
 
@@ -1013,16 +1006,12 @@ std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
   std::vector<uint8_t> temp;
 
   if (m_ubx_buffer.empty())
-  {
     buffer_messages();
-  }
 
   for (i = 0; i < m_ubx_buffer.size(); ++i)
-  {
     if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
         && m_ubx_buffer[i][3] == msg_map.at(msg_class).second.at(msg_id))
       break;
-  }
 
   if (i != m_ubx_buffer.size())
   {
