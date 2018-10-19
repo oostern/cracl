@@ -6,6 +6,7 @@
 #include <boost/asio/serial_port.hpp>
 
 #include <array>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -29,6 +30,8 @@ class device
   std::string m_delim;
 
   std::mutex m_mutex;
+
+  std::shared_ptr<device> m_this;
 
   boost::asio::io_service m_io;
   boost::asio::serial_port m_port;

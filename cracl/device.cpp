@@ -5,6 +5,7 @@
 #include <boost/asio/serial_port.hpp>
 
 #include <array>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -19,6 +20,8 @@ device::device(const std::string& location, size_t baud_rate=115200,
   : m_timeout(timeout), m_location(location), m_delim(std::move(delim)),
     m_io(), m_port(m_io), m_timer(m_io)
 {
+  m_this = std::shared_ptr<device>(this, [=](device* d) { });
+
   m_port.open(m_location);
 
   m_port.set_option(port_base::baud_rate(baud_rate));
@@ -77,9 +80,40 @@ void device::reset()
 {
   std::lock_guard<std::mutex> lock(m_mutex);
 
-  m_port.cancel();
+  m_io.stop();
 
-  m_io.reset();
+  port_base::baud_rate baud_rate;
+  port_base::character_size char_size;
+  port_base::parity parity;
+  port_base::flow_control flow_control;
+  port_base::stop_bits stop_bits;
+
+  m_port.get_option(baud_rate);
+  m_port.get_option(char_size);
+  m_port.get_option(parity);
+  m_port.get_option(flow_control);
+  m_port.get_option(stop_bits);
+
+  m_io.~io_service();
+  new (&m_io) boost::asio::io_service();
+
+  m_port.~basic_serial_port();
+  new (&m_port) boost::asio::serial_port(m_io);
+
+  m_port.open(m_location);
+
+  m_port.set_option(baud_rate);
+  m_port.set_option(char_size);
+  m_port.set_option(parity);
+  m_port.set_option(flow_control);
+  m_port.set_option(stop_bits);
+
+  if (!m_port.is_open())
+    throw std::runtime_error(std::string("Could not re-open port at: "
+          + m_location));
+
+  m_timer.~basic_deadline_timer();
+  new (&m_timer) boost::asio::deadline_timer(m_io);
 }
 
 void device::baud_rate(size_t baud_rate)
@@ -132,14 +166,14 @@ std::vector<uint8_t> device::read()
   std::lock_guard<std::mutex> lock(m_mutex);
 
   boost::asio::async_read_until(m_port, m_buf, m_delim,
-      boost::bind(&device::read_callback, this,
+      boost::bind(&device::read_callback, m_this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred)
       );
 
   m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
 
-  m_timer.async_wait(boost::bind(&device::timeout_callback, this,
+  m_timer.async_wait(boost::bind(&device::timeout_callback, m_this,
         boost::asio::placeholders::error));
 
   m_read_status = read_status::ongoing;
@@ -206,14 +240,14 @@ std::vector<uint8_t> device::read(size_t size)
   if (size != 0)
   {
     boost::asio::async_read(m_port, boost::asio::buffer(data, size),
-        boost::bind(&device::read_callback, this,
+        boost::bind(&device::read_callback, m_this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred)
         );
 
     m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
 
-    m_timer.async_wait(boost::bind(&device::timeout_callback, this,
+    m_timer.async_wait(boost::bind(&device::timeout_callback, m_this,
           boost::asio::placeholders::error));
 
     m_read_status = read_status::ongoing;
@@ -266,14 +300,14 @@ uint8_t device::read_byte()
   else
   {
     boost::asio::async_read(m_port, boost::asio::buffer(&m_result_byte, 1),
-        boost::bind(&device::read_callback, this,
+        boost::bind(&device::read_callback, m_this,
           boost::asio::placeholders::error,
           boost::asio::placeholders::bytes_transferred)
         );
 
     m_timer.expires_from_now(boost::posix_time::millisec(m_timeout));
 
-    m_timer.async_wait(boost::bind(&device::timeout_callback, this,
+    m_timer.async_wait(boost::bind(&device::timeout_callback, m_this,
           boost::asio::placeholders::error));
 
     m_read_status = read_status::ongoing;
