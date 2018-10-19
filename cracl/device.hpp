@@ -6,6 +6,7 @@
 #include <boost/asio/serial_port.hpp>
 
 #include <array>
+#include <mutex>
 #include <string>
 
 using port_base = boost::asio::serial_port_base;
@@ -21,18 +22,20 @@ class device
   size_t m_read_size;
   read_status m_read_status;
 
+  uint8_t m_result_byte;
+  std::vector<uint8_t> m_result_vector;
+
   std::string m_location;
   std::string m_delim;
+
+  std::mutex m_mutex;
 
   boost::asio::io_service m_io;
   boost::asio::serial_port m_port;
   boost::asio::streambuf m_buf;
   boost::asio::deadline_timer m_timer;
 
-  void read_size_callback(const boost::system::error_code& error,
-      const size_t size_transferred);
-
-  void read_delim_callback(const boost::system::error_code& error,
+  void read_callback(const boost::system::error_code& error,
       const size_t size_transferred);
 
   void timeout_callback(const boost::system::error_code& error);

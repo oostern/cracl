@@ -918,46 +918,76 @@ void ublox_8::buffer_messages()
 {
   std::vector<uint8_t> message;
 
-  uint8_t current = read_byte();
+  m_current = read_byte();
 
-  while (true)
+  while (m_current != 0x00)
   {
-    if (current == 0x00)
-      break;
-    else if (current == 0x24  // $ - Start of NMEA/PUBX message
-        || current == 0x21)   // ! - Start of encapsulated NMEA message
+    if (m_current == 0x24       // $ - Start of NMEA/PUBX message
+        || m_current == 0x21)   // ! - Start of encapsulated NMEA message
     {
-      message.push_back(current);
+      message.push_back(m_current);
 
-      while (current != 0x2a) // * - Start of NMEA/PUBX checksum
-        message.push_back(current = read_byte());
+      while (message.size() < 80 // 82  - Max NMEA length (4: $<content>*##<LF>)
+          && m_current >= 0x20   // ' ' - Min valid char
+          && m_current <= 0x7e   // ~   - Max valid char
+          && m_current != 0x2a)  // *   - Start of NMEA/PUBX checksum
+        message.push_back(m_current = read_byte());
 
-      message.push_back(read_byte());
-      message.push_back(read_byte());
+      if (message.size() == 80)  // Read too many chars without finding checksum
+        continue;                //   implying incorrect alignment, jump out
+      else if (m_current == 0x00)// Invalid char, also port is empty, jump out
+        continue;                //   will also fail while condition and exit
+      else if (m_current < 0x20  // Invalid char, jump out and read again to
+          || m_current > 0x7e)   //   see if some start byte is recognized
+        continue;
+      // else: Parsed reasonable number of potentially valid characters, and
+      //   found what looks like the start of a checksum field. Read two bytes
+      //   for the checksum and one byte for the line ending
+
+      message.push_back(read_byte()); // First checksum byte
+      message.push_back(read_byte()); // Second checksum byte
+      read_byte();                    // <LF> - just throw it away
 
       m_nmea_buffer.push_back(message);
     }
-    else if (current == 0xb5) // μ - Start of UBX message
+    else if (m_current == 0xb5)  // μ - Start of UBX message
     {
-      message.push_back(current);
-      std::vector<uint8_t> local_buf = read(5);
+      message.push_back(m_current);
 
-      uint16_t length = *(reinterpret_cast<uint16_t *> (&local_buf[3])) + 2;
+      // Read one byte, expected to be second byte of UBX header
+      m_current = read_byte();
+
+      if (m_current != 0x62)     // Not second byte of UBX header (b), alignment
+        continue;                //   must not be correct, jump out
+      else                       // Else push into message
+        message.push_back(m_current);
+
+      // Read two bytes, expected to be a UBX message class and message ID
+      message.push_back(read_byte());
+      message.push_back(read_byte());
+
+      // Read two bytes, expected to be message length
+      message.push_back(read_byte());
+      message.push_back(read_byte());
+
+      // Interpret length from bytes fetched so far
+      uint16_t length = *(reinterpret_cast<uint16_t *> (&message[4])) + 2;
+
+      if (length > 1024)        // If length is absurdly large assume it's
+        continue;               //   incorrect, jump out
 
       message.reserve(6 + length);
 
-      message.insert(message.end(), local_buf.begin(), local_buf.end());
-
-      local_buf = read(length);
-
-      message.insert(message.end(), local_buf.begin(), local_buf.end());
+      // Read length number of bytes into message
+      for (size_t i = 0; i < length; ++i)
+        message.push_back(read_byte());
 
       m_ubx_buffer.push_back(message);
     }
 
     message.clear();
 
-    current = read_byte();
+    m_current = read_byte();
   }
 }
 
@@ -995,7 +1025,8 @@ std::vector<uint8_t> ublox_8::fetch_ubx()
   return temp;
 }
 
-std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class, std::string&& msg_id)
+std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
+    std::string&& msg_id, bool first_try)
 {
   size_t i;
   std::vector<uint8_t> temp;
@@ -1013,6 +1044,13 @@ std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class, std::string&& m
     temp = m_ubx_buffer[i];
 
     m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
+  }
+  else if (first_try)
+  {
+    buffer_messages();
+
+    return fetch_ubx(std::forward<std::string>(msg_class),
+        std::forward<std::string>(msg_id), false);
   }
 
   return temp;
