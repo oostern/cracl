@@ -131,8 +131,6 @@ std::vector<uint8_t> device::read()
 {
   std::lock_guard<std::mutex> lock(m_mutex);
 
-  m_result_vector.clear();
-
   boost::asio::async_read_until(m_port, m_buf, m_delim,
       boost::bind(&device::read_callback, this,
         boost::asio::placeholders::error,
@@ -174,7 +172,6 @@ std::vector<uint8_t> device::read()
     else if (m_read_status == error)
     {
       m_timer.cancel();
-
       m_port.cancel();
 
       break;
@@ -247,9 +244,9 @@ std::vector<uint8_t> device::read(size_t size)
         break;
       }
     }
-  }
 
-  m_io.reset();
+    m_io.reset();
+  }
 
   return m_result_vector;
 }
@@ -307,9 +304,9 @@ uint8_t device::read_byte()
         break;
       }
     }
-  }
 
-  m_io.reset();
+    m_io.reset();
+  }
 
   return m_result_byte;
 }
