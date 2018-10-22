@@ -817,7 +817,7 @@ public:
     a = (checksum & 0xf0) >> 4;
     b = checksum & 0x0f;
 
-    // Convert numberical values to plaintext hexadecimal
+    // Convert values to plaintext hexadecimal
     a += a < 0xa ? '0' : ('A' - 0xa);
     b += b < 0xa ? '0' : ('A' - 0xa);
 

@@ -1044,7 +1044,6 @@ std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
         && m_ubx_buffer[i][3] == msg_map.at(msg_class).second.at(msg_id))
       break;
 
-
   if (i != m_ubx_buffer.size()) // If found, fetch and erase from buffer
   {
     temp = m_ubx_buffer[i];
