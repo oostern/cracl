@@ -22,7 +22,7 @@ public:
    * @param A shared_ptr to a communication interface
    */
   csac(const std::string& location, size_t baud_rate=57600, size_t timeout=100,
-      size_t char_size=8, std::string delim="\r\n", size_t max_handlers=1000000,
+      size_t char_size=8, std::string delim="\r\n", size_t max_handlers=100000,
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one);
