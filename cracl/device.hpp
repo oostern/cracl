@@ -21,6 +21,7 @@ class device
 {
   size_t m_timeout;
   size_t m_read_size;
+  size_t m_max_handlers;
   read_status m_read_status;
 
   uint8_t m_result_byte;
@@ -43,14 +44,21 @@ class device
 
   void timeout_callback(const boost::system::error_code& error);
 
-public:
-  device(const std::string& location, size_t baud_rate,
-      size_t timeout, size_t char_size, std::string delim,
-      port_base::parity::type parity,
-      port_base::flow_control::type flow_control,
-      port_base::stop_bits::type stop_bits);
+  /* @brief Private function to deconstruct and reconstruct io_service,
+   *        serial_port, and deadline_timer so that the lifecycle of Boost
+   *        handlers can be managed to control heap memory usage.
+   */
+  void flush_handlers();
 
-  void reset();
+public:
+  device(const std::string& location, size_t baud_rate=115200,
+      size_t timeout=100, size_t char_size=8, std::string delim="\r\n",
+      size_t max_handlers=1000000,
+      port_base::parity::type parity=port_base::parity::none,
+      port_base::flow_control::type flow_control=port_base::flow_control::none,
+      port_base::stop_bits::type stop_bits=port_base::stop_bits::one);
+
+  inline size_t handler_count() { return m_this.use_count() - 1; };
 
   void baud_rate(size_t baud_rate);
 

@@ -245,6 +245,21 @@ const std::map<std::string, std::pair<uint8_t, std::map<std::string, uint8_t>>>
 namespace ubx
 {
 
+  /* @brief Compute 8-bit Fletcher checksum and compare it to values in a given
+   *        message
+   */
+  bool valid_checksum(std::vector<uint8_t>& message)
+  {
+    size_t i;
+    uint8_t check_a = 0;
+    uint8_t check_b = 0;
+
+    for (i = 2; i < message.size() - 2; ++i)
+      check_b += (check_a += message[i]);
+
+    return (check_a == message[i] && check_b == message[i + 1]);
+  }
+
 namespace mon
 {
 
@@ -771,6 +786,7 @@ class ublox_8 : public device
 public:
   ublox_8(const std::string& location, size_t baud_rate=9600,
       size_t timeout=500, size_t char_size=8, std::string delim="\r\n",
+      size_t max_handlers=1000000,
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
       port_base::stop_bits::type stop_bits=port_base::stop_bits::one);
@@ -809,12 +825,14 @@ public:
 
     add_pubx_payload(message, args...);
 
+    // Compute XOR checksum
     for (size_t i = 1; i < message.size(); ++i)
       checksum ^= static_cast<uint8_t>(message[i]);
 
     a = (checksum & 0xf0) >> 4;
     b = checksum & 0x0f;
 
+    // Convert numberical values to plaintext hexadecimal
     a += a < 0xa ? '0' : ('A' - 0xa);
     b += b < 0xa ? '0' : ('A' - 0xa);
 
@@ -844,6 +862,7 @@ public:
     uint8_t check_a = 0;
     uint8_t check_b = 0;
 
+    // Compute 8-bit Fletcher checksum
     for (size_t i = 2; i < message.size(); ++i)
       check_b += (check_a += message[i]);
 

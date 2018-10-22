@@ -7,13 +7,13 @@
 namespace cracl
 {
 
-csac::csac(const std::string& location, size_t baud_rate,
-    size_t timeout, size_t char_size, std::string delim,
+csac::csac(const std::string& location, size_t baud_rate, size_t timeout,
+    size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
     port_base::stop_bits::type stop_bits)
-  : device (location, baud_rate, timeout, char_size, delim, parity,
-    flow_control, stop_bits)
+  : device (location, baud_rate, timeout, char_size, delim, max_handlers,
+    parity, flow_control, stop_bits)
 { }
 
 void csac::telemetry_header()
