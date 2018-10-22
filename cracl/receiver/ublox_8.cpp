@@ -15,6 +15,21 @@ namespace cracl
 namespace ubx
 {
 
+/* @brief Compute 8-bit Fletcher checksum and compare it to values in a given
+ *        message
+ */
+bool valid_checksum(std::vector<uint8_t>& message)
+{
+  size_t i;
+  uint8_t check_a = 0;
+  uint8_t check_b = 0;
+
+  for (i = 2; i < message.size() - 2; ++i)
+    check_b += (check_a += message[i]);
+
+  return (check_a == message[i] && check_b == message[i + 1]);
+}
+
 namespace mon
 {
 
