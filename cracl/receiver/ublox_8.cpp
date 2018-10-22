@@ -15,6 +15,9 @@ namespace cracl
 namespace ubx
 {
 
+/* @brief Compute 8-bit Fletcher checksum and compare it to values in a given
+ *        message
+ */
 bool valid_checksum(std::vector<uint8_t>& message)
 {
   size_t i;
@@ -905,13 +908,13 @@ bool rawx::type(std::vector<uint8_t>& message)
 
 } // namespace ubx
 
-ublox_8::ublox_8(const std::string& location, size_t baud_rate,
-    size_t timeout, size_t char_size, std::string delim,
+ublox_8::ublox_8(const std::string& location, size_t baud_rate, size_t timeout,
+    size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
     port_base::stop_bits::type stop_bits)
   : device (location, baud_rate, timeout, char_size, std::string(delim),
-    parity, flow_control, stop_bits)
+    max_handlers, parity, flow_control, stop_bits)
 { }
 
 void ublox_8::buffer_messages()
@@ -920,6 +923,7 @@ void ublox_8::buffer_messages()
 
   m_current = read_byte();
 
+  // Read byte by byte until port returns empty/timeout occurs
   while (m_current != 0x00)
   {
     if (m_current == 0x24       // $ - Start of NMEA/PUBX message
@@ -1034,18 +1038,19 @@ std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
   if (m_ubx_buffer.empty())
     buffer_messages();
 
+  // Look for message with header matching request
   for (i = 0; i < m_ubx_buffer.size(); ++i)
     if (m_ubx_buffer[i][2] == msg_map.at(msg_class).first
         && m_ubx_buffer[i][3] == msg_map.at(msg_class).second.at(msg_id))
       break;
 
-  if (i != m_ubx_buffer.size())
+  if (i != m_ubx_buffer.size()) // If found, fetch and erase from buffer
   {
     temp = m_ubx_buffer[i];
 
     m_ubx_buffer.erase(m_ubx_buffer.begin() + i);
   }
-  else if (first_try)
+  else if (first_try) // If not found and first try, double check for new msgs
   {
     buffer_messages();
 
@@ -1068,6 +1073,8 @@ void ublox_8::flush_ubx()
 
 void ublox_8::disable_nmea()
 {
+  // Disable all NMEA message types (0) for all ports
+  // RATE - NMEA TYPE - DDC - USART1 - USART2 - USB - SPI - reserved
   pubx_send("RATE", "DTM", 0, 0, 0, 0, 0, 0);
   pubx_send("RATE", "GLL", 0, 0, 0, 0, 0, 0);
   pubx_send("RATE", "GNS", 0, 0, 0, 0, 0, 0);

@@ -11,13 +11,13 @@ namespace cracl
 
 std::array<size_t, 5> gpsdo_baud{ 9600, 19200, 38400, 57600, 115200 };
 
-gpstcxo::gpstcxo(const std::string& location, size_t baud_rate,
-    size_t timeout, size_t char_size, std::string delim,
+gpstcxo::gpstcxo(const std::string& location, size_t baud_rate, size_t timeout,
+    size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
     port_base::stop_bits::type stop_bits)
-  : device (location, baud_rate, timeout, char_size, std::move(delim), parity,
-    flow_control, stop_bits)
+  : device (location, baud_rate, timeout, char_size, std::move(delim),
+    max_handlers, parity, flow_control, stop_bits)
 { }
 
 //void gpstcxo::add_pubx_payload(std::vector<char> &message) { }
