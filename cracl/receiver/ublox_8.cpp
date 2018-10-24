@@ -301,6 +301,11 @@ bool dop::type(std::vector<uint8_t>& message)
       && message[3] == msg_map.at("NAV").second.at("DOP"));
 }
 
+posecef::posecef(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
 void posecef::update(std::vector<uint8_t>& message)
 {
   if (type(message))
