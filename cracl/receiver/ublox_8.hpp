@@ -392,6 +392,36 @@ public:
 
 }; // ubx::nav::dop
 
+class posecef
+{
+  uint32_t m_iTOW;
+
+  int32_t m_ecefX;
+  int32_t m_ecefY;
+  int32_t m_ecefZ;
+
+  uint32_t m_pAcc;
+
+public:
+  posecef(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  int32_t ecefX();
+
+  int32_t ecefY();
+
+  int32_t ecefZ();
+
+  uint32_t pAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::posecef
+
+
 class sat
 {
   uint32_t m_iTOW;

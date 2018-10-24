@@ -301,6 +301,55 @@ bool dop::type(std::vector<uint8_t>& message)
       && message[3] == msg_map.at("NAV").second.at("DOP"));
 }
 
+void posecef::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_ecefX = (*(reinterpret_cast<int32_t*> (&message[10])));
+    m_ecefY = (*(reinterpret_cast<int32_t*> (&message[14])));
+    m_ecefZ = (*(reinterpret_cast<int32_t*> (&message[18])));
+
+    m_pAcc = (*(reinterpret_cast<uint32_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t posecef::iTOW()
+{
+  return m_iTOW;
+}
+
+int32_t posecef::ecefX()
+{
+  return m_ecefX;
+}
+
+int32_t posecef::ecefY()
+{
+  return m_ecefY;
+}
+
+int32_t posecef::ecefZ()
+{
+  return m_ecefZ;
+}
+
+uint32_t posecef::pAcc()
+{
+  return m_pAcc;
+}
+
+bool posecef::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == msg_map.at("NAV").first
+      && message[3] == msg_map.at("NAV").second.at("POSECEF"));
+}
+
 sat::sat(std::vector<uint8_t>& message)
 {
   update(message);
