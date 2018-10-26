@@ -1,7 +1,7 @@
-#ifndef CRACL_RECEIVER_UBLOX_HPP
-#define CRACL_RECEIVER_UBLOX_HPP
+#ifndef CRACL_UBLOX_M8_HPP
+#define CRACL_UBLOX_M8_HPP
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <deque>
 #include <iomanip>
@@ -733,7 +733,7 @@ public:
 
 } // namespace ubx
 
-class ublox_8 : public device
+class m8 : public device
 {
   uint8_t m_current;
   std::vector<uint8_t> m_local_buf;
@@ -799,7 +799,7 @@ class ublox_8 : public device
   }
 
 public:
-  ublox_8(const std::string& location, size_t baud_rate=9600,
+  m8(const std::string& location, size_t baud_rate=9600,
       size_t timeout=500, size_t char_size=8, std::string delim="\r\n",
       size_t max_handlers=100000,
       port_base::parity::type parity=port_base::parity::none,
@@ -893,4 +893,4 @@ public:
 
 } // namespace cracl
 
-#endif // CRACL_RECEIVER_UBLOX_HPP
+#endif // CRACL_UBLOX_M8_HPP

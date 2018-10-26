@@ -1,5 +1,5 @@
-#ifndef CRACL_DEVICE_HPP
-#define CRACL_DEVICE_HPP
+#ifndef CRACL_BASE_DEVICE_HPP
+#define CRACL_BASE_DEVICE_HPP
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -83,4 +83,4 @@ public:
 
 } // namespace cracl
 
-#endif // CRACL_DEVICE_HPP
+#endif // CRACL_BASE_DEVICE_HPP

@@ -1,6 +1,6 @@
-#include "ublox_8.hpp"
+#include "m8.hpp"
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <cstring>
 #include <deque>
@@ -962,7 +962,7 @@ bool rawx::type(std::vector<uint8_t>& message)
 
 } // namespace ubx
 
-ublox_8::ublox_8(const std::string& location, size_t baud_rate, size_t timeout,
+m8::m8(const std::string& location, size_t baud_rate, size_t timeout,
     size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
@@ -971,7 +971,7 @@ ublox_8::ublox_8(const std::string& location, size_t baud_rate, size_t timeout,
     max_handlers, parity, flow_control, stop_bits)
 { }
 
-void ublox_8::buffer_messages()
+void m8::buffer_messages()
 {
   std::vector<uint8_t> message;
 
@@ -1049,17 +1049,17 @@ void ublox_8::buffer_messages()
   }
 }
 
-size_t ublox_8::nmea_queued()
+size_t m8::nmea_queued()
 {
   return m_nmea_buffer.size();
 }
 
-size_t ublox_8::ubx_queued()
+size_t m8::ubx_queued()
 {
   return m_ubx_buffer.size();
 }
 
-std::vector<uint8_t> ublox_8::fetch_nmea()
+std::vector<uint8_t> m8::fetch_nmea()
 {
   if (m_nmea_buffer.empty())
     buffer_messages();
@@ -1071,7 +1071,7 @@ std::vector<uint8_t> ublox_8::fetch_nmea()
   return temp;
 }
 
-std::vector<uint8_t> ublox_8::fetch_ubx()
+std::vector<uint8_t> m8::fetch_ubx()
 {
   if (m_ubx_buffer.empty())
     buffer_messages();
@@ -1083,7 +1083,7 @@ std::vector<uint8_t> ublox_8::fetch_ubx()
   return temp;
 }
 
-std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
+std::vector<uint8_t> m8::fetch_ubx(std::string&& msg_class,
     std::string&& msg_id, bool first_try)
 {
   size_t i;
@@ -1115,17 +1115,17 @@ std::vector<uint8_t> ublox_8::fetch_ubx(std::string&& msg_class,
   return temp;
 }
 
-void ublox_8::flush_nmea()
+void m8::flush_nmea()
 {
   m_nmea_buffer.clear();
 }
 
-void ublox_8::flush_ubx()
+void m8::flush_ubx()
 {
   m_ubx_buffer.clear();
 }
 
-void ublox_8::disable_nmea()
+void m8::disable_nmea()
 {
   // Disable all NMEA message types (0) for all ports
   // RATE - NMEA TYPE - DDC - USART1 - USART2 - USB - SPI - reserved

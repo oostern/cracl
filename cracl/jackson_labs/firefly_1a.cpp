@@ -1,6 +1,6 @@
-#include "firefly.hpp"
+#include "firefly_1a.hpp"
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <array>
 #include <deque>
@@ -9,10 +9,10 @@
 namespace cracl
 {
 
-std::array<size_t, 5> firefly_baud{ 9600, 19200, 38400, 57600, 115200 };
+std::array<size_t, 5> firefly_1a_baud{ 9600, 19200, 38400, 57600, 115200 };
 
-firefly::firefly(const std::string& location, size_t baud_rate, size_t timeout,
-    size_t char_size, std::string delim, size_t max_handlers,
+firefly_1a::firefly_1a(const std::string& location, size_t baud_rate,
+    size_t timeout, size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
     port_base::stop_bits::type stop_bits)
@@ -20,10 +20,10 @@ firefly::firefly(const std::string& location, size_t baud_rate, size_t timeout,
     max_handlers, parity, flow_control, stop_bits)
 { }
 
-//void firefly::add_pubx_payload(std::vector<char> &message) { }
+//void firefly_1a::add_pubx_payload(std::vector<char> &message) { }
 
 //template <typename... Args>
-//void firefly::add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
+//void firefly_1a::add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
 //{
 //  message.push_back(',');
 
@@ -34,7 +34,7 @@ firefly::firefly(const std::string& location, size_t baud_rate, size_t timeout,
 //}
 
 //template <typename T, typename... Args>
-//void firefly::add_pubx_payload(std::vector<char> &message, T t, Args... args)
+//void firefly_1a::add_pubx_payload(std::vector<char> &message, T t, Args... args)
 //{
 //  auto temp = std::to_string(t);
 
@@ -46,7 +46,7 @@ firefly::firefly(const std::string& location, size_t baud_rate, size_t timeout,
 //  add_pubx_payload(message, args...);
 //}
 
-void firefly::buffer_messages()
+void firefly_1a::buffer_messages()
 {
   std::vector<uint8_t> message;
 
@@ -91,21 +91,21 @@ void firefly::buffer_messages()
   }
 }
 
-size_t firefly::nmea_queued()
+size_t firefly_1a::nmea_queued()
 {
   buffer_messages();
 
   return m_nmea_buffer.size();
 }
 
-size_t firefly::scpi_queued()
+size_t firefly_1a::scpi_queued()
 {
   buffer_messages();
 
   return m_scpi_buffer.size();
 }
 
-std::vector<uint8_t> firefly::fetch_nmea()
+std::vector<uint8_t> firefly_1a::fetch_nmea()
 {
   if (m_nmea_buffer.empty())
     buffer_messages();
@@ -117,7 +117,7 @@ std::vector<uint8_t> firefly::fetch_nmea()
   return temp;
 }
 
-std::vector<uint8_t> firefly::fetch_scpi()
+std::vector<uint8_t> firefly_1a::fetch_scpi()
 {
   if (m_scpi_buffer.empty())
     buffer_messages();
@@ -129,18 +129,18 @@ std::vector<uint8_t> firefly::fetch_scpi()
   return temp;
 }
 
-void firefly::flush_nmea()
+void firefly_1a::flush_nmea()
 {
   m_nmea_buffer.clear();
 }
 
-void firefly::flush_scpi()
+void firefly_1a::flush_scpi()
 {
   m_scpi_buffer.clear();
 }
 
 //template <typename... Args>
-//void firefly::scpi_send(std::string&& msg_id, Args... args)
+//void firefly_1a::scpi_send(std::string&& msg_id, Args... args)
 //{
 //  uint8_t checksum = 0x00;
 //  std::vector<char> message = { '$', 'P', 'U', 'B', 'X', ',' };
@@ -176,76 +176,76 @@ void firefly::flush_scpi()
 //  write(message);
 //}
 
-void firefly::gps()
+void firefly_1a::gps()
 {
   write("GPS?");
 }
 
-void firefly::gps_sat_tra_coun()
+void firefly_1a::gps_sat_tra_coun()
 {
   write("GPS:SAT:TRA:COUN?");
 }
 
-void firefly::gps_sat_vis_coun()
+void firefly_1a::gps_sat_vis_coun()
 {
   write("GPS:SAT:VIS:COUN?");
 }
 
-void firefly::gps_gpgga(size_t freq)
+void firefly_1a::gps_gpgga(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GPGGA " + std::to_string(freq));
 }
 
-void firefly::gps_ggast(size_t freq)
+void firefly_1a::gps_ggast(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GGAST " + std::to_string(freq));
 }
 
-void firefly::gps_gprmc(size_t freq)
+void firefly_1a::gps_gprmc(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GPRMC " + std::to_string(freq));
 }
 
-void firefly::gps_xyzsp(size_t freq)
+void firefly_1a::gps_xyzsp(size_t freq)
 {
   if (freq <= 255)
     write("GPS:XYZSP " + std::to_string(freq));
 }
 
-void firefly::ptime()
+void firefly_1a::ptime()
 {
   write("PTIME?");
 }
 
-void firefly::ptim_date()
+void firefly_1a::ptim_date()
 {
   write("PTIM:DATE?");
 }
 
-void firefly::ptim_time()
+void firefly_1a::ptim_time()
 {
   write("PTIM:TIME?");
 }
 
-void firefly::ptim_time_str()
+void firefly_1a::ptim_time_str()
 {
   write("PTIM:TIME:STR?");
 }
 
-void firefly::ptim_tint()
+void firefly_1a::ptim_tint()
 {
   write("PTIM:TINT?");
 }
 
-void firefly::sync()
+void firefly_1a::sync()
 {
   write("SYNC?");
 }
 
-void firefly::sync_sour_mode(sync_source source)
+void firefly_1a::sync_sour_mode(sync_source source)
 {
   switch (source)
   {
@@ -255,79 +255,79 @@ void firefly::sync_sour_mode(sync_source source)
   }
 }
 
-void firefly::sync_sour_mode(std::string&& source)
+void firefly_1a::sync_sour_mode(std::string&& source)
 {
   write("SYNC:SOUR:MODE " + source);
 }
 
 /* @brief Function to query the synchronization source being used
  */
-void firefly::sync_sour_state()
+void firefly_1a::sync_sour_state()
 {
   write("SYNC:SOUR:STATE?");
 }
 
-void firefly::sync_hold_dur()
+void firefly_1a::sync_hold_dur()
 {
   write("SYNC:HOLD:DUR?");
 }
 
-void firefly::sync_hold_init()
+void firefly_1a::sync_hold_init()
 {
   write("SYNC:HOLD:INIT");
 }
 
-void firefly::sync_hold_rec_init()
+void firefly_1a::sync_hold_rec_init()
 {
   write("SYNC:HOLD:REC:INIT");
 }
 
-void firefly::sync_tint()
+void firefly_1a::sync_tint()
 {
   write("SYNC:TINT?");
 }
 
-void firefly::sync_imme()
+void firefly_1a::sync_imme()
 {
   write("SYNC:IMME");
 }
 
-void firefly::sync_fee()
+void firefly_1a::sync_fee()
 {
   write("SYNC:FEE?");
 }
 
-void firefly::sync_lock()
+void firefly_1a::sync_lock()
 {
   write("SYNC:LOCK?");
 }
 
-void firefly::sync_health()
+void firefly_1a::sync_health()
 {
   write("SYNC:HEALTH?");
 }
 
-void firefly::diag_rosc_efc_rel()
+void firefly_1a::diag_rosc_efc_rel()
 {
   write("DIAG:ROSC:EFC:REL?");
 }
 
-void firefly::diag_rosc_efc_abs()
+void firefly_1a::diag_rosc_efc_abs()
 {
   write("DIAG:ROSC:EFC:ABS?");
 }
 
-void firefly::syst_stat()
+void firefly_1a::syst_stat()
 {
   write("SYST:STAT?");
 }
 
-void firefly::syst_comm_ser_echo()
+void firefly_1a::syst_comm_ser_echo()
 {
   write("SYST:COMM:SER:ECHO?");
 }
 
-void firefly::syst_comm_ser_echo(bool state)
+void firefly_1a::syst_comm_ser_echo(bool state)
 {
   std::string command = "SYST:COMM:SER:ECHO "
     + (state ? std::string("ON") : std::string("OFF"));
@@ -335,12 +335,12 @@ void firefly::syst_comm_ser_echo(bool state)
   write(command.c_str());
 }
 
-void firefly::syst_comm_ser_pro()
+void firefly_1a::syst_comm_ser_pro()
 {
   write("SYST:COMM:SER:PRO?");
 }
 
-void firefly::syst_comm_ser_pro(bool state)
+void firefly_1a::syst_comm_ser_pro(bool state)
 {
   std::string command = "SYST:COMM:SER:PRO "
     + (state ? std::string("ON") : std::string("OFF"));
@@ -348,57 +348,57 @@ void firefly::syst_comm_ser_pro(bool state)
   write(command.c_str());
 }
 
-void firefly::syst_comm_ser_baud()
+void firefly_1a::syst_comm_ser_baud()
 {
   write("SYST:COMM:SER:BAUD?");
 }
 
-void firefly::syst_comm_ser_baud(size_t proposed)
+void firefly_1a::syst_comm_ser_baud(size_t proposed)
 {
-  for (uint32_t i : firefly_baud)
-    if (proposed == firefly_baud.at(i))
+  for (uint32_t i : firefly_1a_baud)
+    if (proposed == firefly_1a_baud.at(i))
     {
       write("SYST:COMM:SER:BAUD");
       break;
     }
 }
 
-void firefly::serv()
+void firefly_1a::serv()
 {
   write("SERV?");
 }
 
-void firefly::serv_coarsd(size_t val)
+void firefly_1a::serv_coarsd(size_t val)
 {
   if (val <= 255)
     write("SERV:COARSD " + std::to_string(val));
 }
 
-void firefly::serv_efcs(double value)
+void firefly_1a::serv_efcs(double value)
 {
   if (value >= 0.0 && value <= 500.0)
     write("SERV:EFCS " + std::to_string(value));
 }
 
-void firefly::serv_efcd(double value)
+void firefly_1a::serv_efcd(double value)
 {
   if (value >= 0.0 && value <= 4000.0)
     write("SERV:EFCD " + std::to_string(value));
 }
 
-void firefly::serv_tempco(double value)
+void firefly_1a::serv_tempco(double value)
 {
   if (value >= -4000.0 && value <= 4000.0)
     write("SERV:TEMPCO " + std::to_string(value));
 }
 
-void firefly::serv_aging(double value)
+void firefly_1a::serv_aging(double value)
 {
   if (value >= -10.0 && value <= 10.0)
     write("SERV:AGING " + std::to_string(value));
 }
 
-void firefly::serv_phaseco(double value)
+void firefly_1a::serv_phaseco(double value)
 {
   if (value >= -100.0 && value <= 100.0)
   {
@@ -406,17 +406,17 @@ void firefly::serv_phaseco(double value)
   }
 }
 
-void firefly::serv_1pps()
+void firefly_1a::serv_1pps()
 {
   write("SERV:1PPS?");
 }
 
-void firefly::serv_1pps(int offset)
+void firefly_1a::serv_1pps(int offset)
 {
   write("SERV:1PPS " + std::to_string(offset));
 }
 
-void firefly::serv_trac(size_t freq)
+void firefly_1a::serv_trac(size_t freq)
 {
   write("SERV:TRAC " + std::to_string(freq));
 }
