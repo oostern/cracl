@@ -12,15 +12,6 @@
 namespace cracl
 {
 
-namespace ubx
-{
-
-extern const std::map<std::string,
-       std::pair<uint8_t, std::map<std::string, uint8_t>>>
-         msg_map;
-
-}
-
 class m8 : public device
 {
   uint8_t m_current;
