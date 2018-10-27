@@ -69,7 +69,8 @@ void gps300::buffer_messages()
       m_nmea_buffer.push_back(message);
 
       // Consume '\r\n'
-      read(2);
+      read_byte();
+      read_byte();
     }
     else
     {
@@ -82,7 +83,8 @@ void gps300::buffer_messages()
       m_scpi_buffer.push_back(message);
 
       // Consume 'scpi > '
-      read(7);
+      for (size_t i = 0; i < 7; ++i)
+        read_byte();
     }
 
     message.clear();
