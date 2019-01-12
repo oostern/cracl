@@ -1,27 +1,27 @@
-#ifndef CRACL_CLOCK_CSAC_HPP
-#define CRACL_CLOCK_CSAC_HPP
+#ifndef CRACL_MICROSEMI_SA45S_HPP
+#define CRACL_MICROSEMI_SA45S_HPP
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <string>
 
 namespace cracl
 {
 
-/* @class csac_device
+/* @class sa45s_device
  *
  * This implementation targets the Microsemi/Symmetricom SA.45 CSAC
  *
  * @brief Class to represent a CSAC
  */
-class csac : public device
+class sa45s : public device
 {
 public:
-  /* @brief Constructor for csac device
+  /* @brief Constructor for sa45s device
    *
    * @param A shared_ptr to a communication interface
    */
-  csac(const std::string& location, size_t baud_rate=57600, size_t timeout=100,
+  sa45s(const std::string& location, size_t baud_rate=57600, size_t timeout=100,
       size_t char_size=8, std::string delim="\r\n", size_t max_handlers=100000,
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
@@ -63,4 +63,4 @@ public:
 
 } // namespace cracl
 
-#endif // CRACL_CLOCK_CSAC_HPP
+#endif // CRACL_MICROSEMI_SA45S_HPP

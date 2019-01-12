@@ -1,7 +1,7 @@
-#ifndef CRACL_CLOCK_FIREFLY_HPP
-#define CRACL_CLOCK_FIREFLY_HPP
+#ifndef CRACL_JACKSON_LABS_FIREFLY_1A_HPP
+#define CRACL_JACKSON_LABS_FIREFLY_1A_HPP
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <array>
 #include <deque>
@@ -12,7 +12,7 @@ namespace cracl
 
 enum sync_source { GPS, EXT, AUTO };
 
-class firefly : public device
+class firefly_1a : public device
 {
   std::deque<std::vector<uint8_t>> m_nmea_buffer;
   std::deque<std::vector<uint8_t>> m_scpi_buffer;
@@ -28,7 +28,7 @@ class firefly : public device
   void buffer_messages();
 
 public:
-  firefly(const std::string& location, size_t baud_rate=115200,
+  firefly_1a(const std::string& location, size_t baud_rate=115200,
       size_t timeout=100, size_t char_size=8, std::string delim="\r\n\r\n",
       size_t max_handlers=100000,
       port_base::parity::type parity=port_base::parity::none,
@@ -352,4 +352,4 @@ public:
 
 } // namespace cracl
 
-#endif // CRACL_CLOCK_FIREFLY_HPP
+#endif // CRACL_JACKSON_LABS_FIREFLY_1A_HPP

@@ -1,6 +1,6 @@
-#include "gpstcxo.hpp"
+#include "gps300.hpp"
 
-#include "../device.hpp"
+#include "../base/device.hpp"
 
 #include <array>
 #include <deque>
@@ -11,7 +11,7 @@ namespace cracl
 
 std::array<size_t, 5> gpsdo_baud{ 9600, 19200, 38400, 57600, 115200 };
 
-gpstcxo::gpstcxo(const std::string& location, size_t baud_rate, size_t timeout,
+gps300::gps300(const std::string& location, size_t baud_rate, size_t timeout,
     size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
@@ -20,10 +20,10 @@ gpstcxo::gpstcxo(const std::string& location, size_t baud_rate, size_t timeout,
     max_handlers, parity, flow_control, stop_bits)
 { }
 
-//void gpstcxo::add_pubx_payload(std::vector<char> &message) { }
+//void gps300::add_pubx_payload(std::vector<char> &message) { }
 
 //template <typename... Args>
-//void gpstcxo::add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
+//void gps300::add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
 //{
 //  message.push_back(',');
 
@@ -34,7 +34,7 @@ gpstcxo::gpstcxo(const std::string& location, size_t baud_rate, size_t timeout,
 //}
 
 //template <typename T, typename... Args>
-//void gpstcxo::add_pubx_payload(std::vector<char> &message, T t, Args... args)
+//void gps300::add_pubx_payload(std::vector<char> &message, T t, Args... args)
 //{
 //  auto temp = std::to_string(t);
 
@@ -46,7 +46,7 @@ gpstcxo::gpstcxo(const std::string& location, size_t baud_rate, size_t timeout,
 //  add_pubx_payload(message, args...);
 //}
 
-void gpstcxo::buffer_messages()
+void gps300::buffer_messages()
 {
   std::vector<uint8_t> message;
 
@@ -69,7 +69,8 @@ void gpstcxo::buffer_messages()
       m_nmea_buffer.push_back(message);
 
       // Consume '\r\n'
-      read(2);
+      read_byte();
+      read_byte();
     }
     else
     {
@@ -82,7 +83,8 @@ void gpstcxo::buffer_messages()
       m_scpi_buffer.push_back(message);
 
       // Consume 'scpi > '
-      read(7);
+      for (size_t i = 0; i < 7; ++i)
+        read_byte();
     }
 
     message.clear();
@@ -91,21 +93,21 @@ void gpstcxo::buffer_messages()
   }
 }
 
-size_t gpstcxo::nmea_queued()
+size_t gps300::nmea_queued()
 {
   buffer_messages();
 
   return m_nmea_buffer.size();
 }
 
-size_t gpstcxo::scpi_queued()
+size_t gps300::scpi_queued()
 {
   buffer_messages();
 
   return m_scpi_buffer.size();
 }
 
-std::vector<uint8_t> gpstcxo::fetch_nmea()
+std::vector<uint8_t> gps300::fetch_nmea()
 {
   if (m_nmea_buffer.empty())
     buffer_messages();
@@ -117,7 +119,7 @@ std::vector<uint8_t> gpstcxo::fetch_nmea()
   return temp;
 }
 
-std::vector<uint8_t> gpstcxo::fetch_scpi()
+std::vector<uint8_t> gps300::fetch_scpi()
 {
   if (m_scpi_buffer.empty())
     buffer_messages();
@@ -129,18 +131,18 @@ std::vector<uint8_t> gpstcxo::fetch_scpi()
   return temp;
 }
 
-void gpstcxo::flush_nmea()
+void gps300::flush_nmea()
 {
   m_nmea_buffer.clear();
 }
 
-void gpstcxo::flush_scpi()
+void gps300::flush_scpi()
 {
   m_scpi_buffer.clear();
 }
 
 //template <typename... Args>
-//void gpstcxo::scpi_send(std::string&& msg_id, Args... args)
+//void gps300::scpi_send(std::string&& msg_id, Args... args)
 //{
 //  uint8_t checksum = 0x00;
 //  std::vector<char> message = { '$', 'P', 'U', 'B', 'X', ',' };
@@ -176,76 +178,76 @@ void gpstcxo::flush_scpi()
 //  write(message);
 //}
 
-void gpstcxo::gps()
+void gps300::gps()
 {
   write("GPS?");
 }
 
-void gpstcxo::gps_sat_tra_coun()
+void gps300::gps_sat_tra_coun()
 {
   write("GPS:SAT:TRA:COUN?");
 }
 
-void gpstcxo::gps_sat_vis_coun()
+void gps300::gps_sat_vis_coun()
 {
   write("GPS:SAT:VIS:COUN?");
 }
 
-void gpstcxo::gps_gpgga(size_t freq)
+void gps300::gps_gpgga(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GPGGA " + std::to_string(freq));
 }
 
-void gpstcxo::gps_ggast(size_t freq)
+void gps300::gps_ggast(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GGAST " + std::to_string(freq));
 }
 
-void gpstcxo::gps_gprmc(size_t freq)
+void gps300::gps_gprmc(size_t freq)
 {
   if (freq <= 255)
     write("GPS:GPRMC " + std::to_string(freq));
 }
 
-void gpstcxo::gps_xyzsp(size_t freq)
+void gps300::gps_xyzsp(size_t freq)
 {
   if (freq <= 255)
     write("GPS:XYZSP " + std::to_string(freq));
 }
 
-void gpstcxo::ptime()
+void gps300::ptime()
 {
   write("PTIME?");
 }
 
-void gpstcxo::ptim_date()
+void gps300::ptim_date()
 {
   write("PTIM:DATE?");
 }
 
-void gpstcxo::ptim_time()
+void gps300::ptim_time()
 {
   write("PTIM:TIME?");
 }
 
-void gpstcxo::ptim_time_str()
+void gps300::ptim_time_str()
 {
   write("PTIM:TIME:STR?");
 }
 
-void gpstcxo::ptim_tint()
+void gps300::ptim_tint()
 {
   write("PTIM:TINT?");
 }
 
-void gpstcxo::sync()
+void gps300::sync()
 {
   write("SYNC?");
 }
 
-void gpstcxo::sync_sour_mode(sync_source source)
+void gps300::sync_sour_mode(sync_source source)
 {
   switch (source)
   {
@@ -255,77 +257,77 @@ void gpstcxo::sync_sour_mode(sync_source source)
   }
 }
 
-void gpstcxo::sync_sour_mode(std::string&& source)
+void gps300::sync_sour_mode(std::string&& source)
 {
   write("SYNC:SOUR:MODE " + source);
 }
 
-void gpstcxo::sync_sour_state()
+void gps300::sync_sour_state()
 {
   write("SYNC:SOUR:STATE?");
 }
 
-void gpstcxo::sync_hold_dur()
+void gps300::sync_hold_dur()
 {
   write("SYNC:HOLD:DUR?");
 }
 
-void gpstcxo::sync_hold_init()
+void gps300::sync_hold_init()
 {
   write("SYNC:HOLD:INIT");
 }
 
-void gpstcxo::sync_hold_rec_init()
+void gps300::sync_hold_rec_init()
 {
   write("SYNC:HOLD:REC:INIT");
 }
 
-void gpstcxo::sync_tint()
+void gps300::sync_tint()
 {
   write("SYNC:TINT?");
 }
 
-void gpstcxo::sync_imme()
+void gps300::sync_imme()
 {
   write("SYNC:IMME");
 }
 
-void gpstcxo::sync_fee()
+void gps300::sync_fee()
 {
   write("SYNC:FEE?");
 }
 
-void gpstcxo::sync_lock()
+void gps300::sync_lock()
 {
   write("SYNC:LOCK?");
 }
 
-void gpstcxo::sync_health()
+void gps300::sync_health()
 {
   write("SYNC:HEALTH?");
 }
 
-void gpstcxo::diag_rosc_efc_rel()
+void gps300::diag_rosc_efc_rel()
 {
   write("DIAG:ROSC:EFC:REL?");
 }
 
-void gpstcxo::diag_rosc_efc_abs()
+void gps300::diag_rosc_efc_abs()
 {
   write("DIAG:ROSC:EFC:ABS?");
 }
 
-void gpstcxo::syst_stat()
+void gps300::syst_stat()
 {
   write("SYST:STAT?");
 }
 
-void gpstcxo::syst_comm_ser_echo()
+void gps300::syst_comm_ser_echo()
 {
   write("SYST:COMM:SER:ECHO?");
 }
 
-void gpstcxo::syst_comm_ser_echo(bool state)
+void gps300::syst_comm_ser_echo(bool state)
 {
   std::string command = "SYST:COMM:SER:ECHO "
     + (state ? std::string("ON") : std::string("OFF"));
@@ -333,12 +335,12 @@ void gpstcxo::syst_comm_ser_echo(bool state)
   write(command.c_str());
 }
 
-void gpstcxo::syst_comm_ser_pro()
+void gps300::syst_comm_ser_pro()
 {
   write("SYST:COMM:SER:PRO?");
 }
 
-void gpstcxo::syst_comm_ser_pro(bool state)
+void gps300::syst_comm_ser_pro(bool state)
 {
   std::string command = "SYST:COMM:SER:PRO "
     + (state ? std::string("ON") : std::string("OFF"));
@@ -346,12 +348,12 @@ void gpstcxo::syst_comm_ser_pro(bool state)
   write(command.c_str());
 }
 
-void gpstcxo::syst_comm_ser_baud()
+void gps300::syst_comm_ser_baud()
 {
   write("SYST:COMM:SER:BAUD?");
 }
 
-void gpstcxo::syst_comm_ser_baud(size_t proposed)
+void gps300::syst_comm_ser_baud(size_t proposed)
 {
   for (uint32_t i : gpsdo_baud)
     if (proposed == gpsdo_baud.at(i))
@@ -361,42 +363,42 @@ void gpstcxo::syst_comm_ser_baud(size_t proposed)
     }
 }
 
-void gpstcxo::serv()
+void gps300::serv()
 {
   write("SERV?");
 }
 
-void gpstcxo::serv_coarsd(size_t val)
+void gps300::serv_coarsd(size_t val)
 {
   if (val <= 255)
     write("SERV:COARSD " + std::to_string(val));
 }
 
-void gpstcxo::serv_efcs(double value)
+void gps300::serv_efcs(double value)
 {
   if (value >= 0.0 && value <= 500.0)
     write("SERV:EFCS " + std::to_string(value));
 }
 
-void gpstcxo::serv_efcd(double value)
+void gps300::serv_efcd(double value)
 {
   if (value >= 0.0 && value <= 4000.0)
     write("SERV:EFCD " + std::to_string(value));
 }
 
-void gpstcxo::serv_tempco(double value)
+void gps300::serv_tempco(double value)
 {
   if (value >= -4000.0 && value <= 4000.0)
     write("SERV:TEMPCO " + std::to_string(value));
 }
 
-void gpstcxo::serv_aging(double value)
+void gps300::serv_aging(double value)
 {
   if (value >= -10.0 && value <= 10.0)
     write("SERV:AGING " + std::to_string(value));
 }
 
-void gpstcxo::serv_phaseco(double value)
+void gps300::serv_phaseco(double value)
 {
   if (value >= -100.0 && value <= 100.0)
   {
@@ -404,17 +406,17 @@ void gpstcxo::serv_phaseco(double value)
   }
 }
 
-void gpstcxo::serv_1pps()
+void gps300::serv_1pps()
 {
   write("SERV:1PPS?");
 }
 
-void gpstcxo::serv_1pps(int offset)
+void gps300::serv_1pps(int offset)
 {
   write("SERV:1PPS " + std::to_string(offset));
 }
 
-void gpstcxo::serv_trac(size_t freq)
+void gps300::serv_trac(size_t freq)
 {
   write("SERV:TRAC " + std::to_string(freq));
 }
