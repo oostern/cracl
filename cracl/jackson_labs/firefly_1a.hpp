@@ -115,7 +115,7 @@ public:
   /* @brief Function to return information about time, including date, time in
    *        UTC, timezone, and time shift between the GPSDO and GPS time
    */
-  void ptime();
+  void ptim();
 
   /* @brief Function to query the calendar date (UTC)
    */

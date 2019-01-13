@@ -217,9 +217,9 @@ void firefly_1a::gps_xyzsp(size_t freq)
     write("GPS:XYZSP " + std::to_string(freq));
 }
 
-void firefly_1a::ptime()
+void firefly_1a::ptim()
 {
-  write("PTIME?");
+  write("PTIM?");
 }
 
 void firefly_1a::ptim_date()
