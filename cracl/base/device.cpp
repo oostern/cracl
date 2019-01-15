@@ -98,6 +98,16 @@ void device::flush_handlers()
   m_port.get_option(flow_control);
   m_port.get_option(stop_bits);
 
+  // Seperated destruction and construction of port and timer:
+  //   Destructing either also calls basic_io_context destructor, preventing the
+  //   process from being interleaved
+
+  // Manually destruct port
+  m_port.~basic_serial_port();
+
+  // Manually destruct timer
+  m_timer.~basic_deadline_timer();
+
   // Manually call destructor and perform in-place new construction to manage
   //   lifecycle. Destructing io_serice results in the destruction of stored
   //   handlers from previous read and write operations, which would otherwise
@@ -105,8 +115,7 @@ void device::flush_handlers()
   m_io.~io_service();
   new (&m_io) boost::asio::io_service();
 
-  // Manually destruct and re-construct port with new io_service
-  m_port.~basic_serial_port();
+  // Manually re-construct port with new io_service
   new (&m_port) boost::asio::serial_port(m_io);
 
   m_port.open(m_location);
@@ -121,8 +130,7 @@ void device::flush_handlers()
     throw std::runtime_error(std::string("Could not re-open port at: "
           + m_location));
 
-  // Manually destruct and re-construct timer with new io_service
-  m_timer.~basic_deadline_timer();
+  // Manually re-construct timer with new io_service
   new (&m_timer) boost::asio::deadline_timer(m_io);
 }
 
