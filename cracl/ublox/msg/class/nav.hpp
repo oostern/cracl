@@ -301,7 +301,7 @@ public:
 
   static bool type(std::vector<uint8_t>& message);
 
-}; // ubx::nav::status
+}; // ubx::nav::timeutc
 
 } // namespace nav
 
