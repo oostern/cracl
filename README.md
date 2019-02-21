@@ -15,7 +15,7 @@ PUBX messages with the u-blox are similar, just pass whatever you want into the 
 
 We use Ubuntu 18.04 and 16.04, but it should theoretically be portable, you'll just need Boost ASIO.
 
-A Makefile is included which generates a shared library file to link against. By default it places it two directories up in a folder called lib (that must exist). You might want to change this. After including the headers in your code, just link against the library.
+A Makefile is included which generates a shared library file to link against. After including the headers in your code, just link against the library.
 
 The constructors for each device require the port at a minimum, but you can also set the baud rate, timeout, etc if needed.
 ### Examples:
@@ -55,7 +55,7 @@ if (ubx::nav::status::type(m))
 
   // Read spoofDetState attribute (names and values correspond to field names in
   //                               UBX protocol, except when field name is
-  //                               capilatized)
+  //                               capitalized)
   switch (parsed.spoofDetState())
   {
     case 0: std::cout << "UNKNOWN" << std::endl; break;

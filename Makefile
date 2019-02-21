@@ -11,12 +11,23 @@ DEPS=cracl/base/device.hpp cracl/ublox/msg/base.hpp \
 
 OBJS=$(DEPS:%.hpp=%.o)
 
+TEST_SRCS=$(wildcard tests/*.cc)
+
+TESTS=$(TEST_SRCS:%.cc=%.elf)
+
 %.o: %.cpp $(DEPS)
 	$(CXX) $(CXX_FLAGS) -c -o $@ $< $(BOOST_FLAGS)
 
-cracl: $(OBJS)
+%.elf: %.cc
+	$(CXX) $(CXX_FLAGS) $(CXX_INCLUDE) -o $@ $< -L. -lCracl $(BOOST_FLAGS)
+
+lib: $(OBJS)
 	ar rvs libCracl.a $(OBJS)
+
+cracl: lib
 	mv libCracl.a ../../lib/
+
+test: lib $(TESTS)
 
 clean:
 	rm $(OBJS)

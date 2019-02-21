@@ -1,17 +1,16 @@
 #include <iostream>
 
-#include <cracl/device.hpp>
-#include <cracl/clock/csac.hpp>
-#include <cracl/clock/firefly.hpp>
-#include <cracl/receiver/ublox_8.hpp>
+#include <cracl/microsemi/sa45s.hpp>
+#include <cracl/jackson_labs/firefly_1a.hpp>
+#include <cracl/ublox/m8.hpp>
 
 int main(int argc, char* argv[])
 {
   using namespace cracl;
 
-  ublox_8 x("/dev/ttyACM1");
-  firefly g("/dev/ttyUSB0");
-  csac c("/dev/ttyUSB1");
+  m8 x("/dev/ttyACM1");
+  firefly_1a g("/dev/ttyUSB0");
+  sa45s c("/dev/ttyUSB1");
 
   // Test connectioon with CSAC
   c.write("!^\r\n");
