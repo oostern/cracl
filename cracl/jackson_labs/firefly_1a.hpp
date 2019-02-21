@@ -29,7 +29,7 @@ class firefly_1a : public device
 
 public:
   firefly_1a(const std::string& location, size_t baud_rate=115200,
-      size_t timeout=100, size_t char_size=8, std::string delim="\r\n\r\n",
+      size_t timeout=1000, size_t char_size=8, std::string delim="\r\n\r\n",
       size_t max_handlers=100000,
       port_base::parity::type parity=port_base::parity::none,
       port_base::flow_control::type flow_control=port_base::flow_control::none,
@@ -115,7 +115,7 @@ public:
   /* @brief Function to return information about time, including date, time in
    *        UTC, timezone, and time shift between the GPSDO and GPS time
    */
-  void ptime();
+  void ptim();
 
   /* @brief Function to query the calendar date (UTC)
    */

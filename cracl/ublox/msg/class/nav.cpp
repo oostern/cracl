@@ -472,6 +472,111 @@ bool status::type(std::vector<uint8_t>& message)
       && message[3] == ubx::msg_map.at("NAV").second.at("STATUS"));
 }
 
+timeutc::timeutc(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void timeutc::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[10])));
+
+    m_nano = (*(reinterpret_cast<int32_t*> (&message[14])));
+
+    m_year = (*(reinterpret_cast<uint16_t*> (&message[18])));
+
+    m_month = message[20];
+    m_day = message[21];
+    m_hour = message[22];
+    m_min = message[23];
+    m_sec = message[24];
+
+    m_validTOW = message[25] & 0x01;
+    m_validWKN = message[25] >> 1 & 0x01;
+    m_validUTC = message[25] >> 2 & 0x01;
+    m_utcStandard = message[25] >> 4 & 0x0f;
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t timeutc::iTOW()
+{
+  return m_iTOW;
+}
+
+uint32_t timeutc::tAcc()
+{
+  return m_tAcc;
+}
+
+int32_t timeutc::nano()
+{
+  return m_nano;
+}
+
+uint16_t timeutc::year()
+{
+  return m_year;
+}
+
+uint8_t timeutc::month()
+{
+  return m_month;
+}
+
+uint8_t timeutc::day()
+{
+  return m_day;
+}
+
+uint8_t timeutc::hour()
+{
+  return m_hour;
+}
+
+uint8_t timeutc::min()
+{
+  return m_min;
+}
+
+uint8_t timeutc::sec()
+{
+  return m_sec;
+}
+
+uint8_t timeutc::validTOW()
+{
+  return m_validTOW;
+}
+
+uint8_t timeutc::validWKN()
+{
+  return m_validWKN;
+}
+
+uint8_t timeutc::validUTC()
+{
+  return m_validUTC;
+}
+
+uint8_t timeutc::utcStandard()
+{
+  return m_utcStandard;
+}
+
+bool timeutc::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("TIMEUTC"));
+}
+
 } // namespace nav
 
 } // namespace ubx

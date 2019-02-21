@@ -108,7 +108,6 @@ public:
 
 }; // ubx::nav::posecef
 
-
 class sat
 {
   uint32_t m_iTOW;
@@ -247,6 +246,62 @@ public:
   static bool type(std::vector<uint8_t>& message);
 
 }; // ubx::nav::status
+
+class timeutc
+{
+  uint32_t m_iTOW;
+
+  uint32_t m_tAcc;
+
+  int32_t m_nano;
+
+  uint16_t m_year;
+
+  uint8_t m_month;
+  uint8_t m_day;
+  uint8_t m_hour;
+  uint8_t m_min;
+  uint8_t m_sec;
+
+  uint8_t m_validTOW;
+  uint8_t m_validWKN;
+  uint8_t m_validUTC;
+  uint8_t m_utcStandard;
+
+public:
+  timeutc(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint32_t tAcc();
+
+  int32_t nano();
+
+  uint16_t year();
+
+  uint8_t month();
+
+  uint8_t day();
+
+  uint8_t hour();
+
+  uint8_t min();
+
+  uint8_t sec();
+
+  uint8_t validTOW();
+
+  uint8_t validWKN();
+
+  uint8_t validUTC();
+
+  uint8_t utcStandard();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::timeutc
 
 } // namespace nav
 
