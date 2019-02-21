@@ -13,7 +13,7 @@ Sending of all UBX messages should be supported, though not fully tested. When s
 
 PUBX messages with the u-blox are similar, just pass whatever you want into the `pubx_send` function. NMEA messages are returned as strings for you to parse yourself.
 
-We use the library with Ubuntu 18.04 and 16.04, but it should theoretically be portable, you just need Boost ASIO.
+We use Ubuntu 18.04 and 16.04, but it should theoretically be portable, you'll just need Boost ASIO.
 
 A Makefile is included which generates a shared library file to link against. By default it places it two directories up in a folder called lib (that must exist). You might want to change this. After including the headers in your code, just link against the library.
 
@@ -46,7 +46,7 @@ auto m = x.fetch_ubx("NAV", "STATUS");
 
 Parse the message and use contents
 ```
-// Verify type (confirms a non-empty message was receivd, and checksum is good)
+// Verify (confirms a non-empty message was received, and checksum is good)
 if (ubx::nav::status::type(m))
 {
   ubx::nav::status parsed = ubx::nav::status(m);
