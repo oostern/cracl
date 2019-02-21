@@ -1,8 +1,8 @@
-#include <iostream>
-
 #include <cracl/microsemi/sa45s.hpp>
 #include <cracl/jackson_labs/firefly_1a.hpp>
 #include <cracl/ublox/m8.hpp>
+
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
