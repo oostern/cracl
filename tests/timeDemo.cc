@@ -11,6 +11,60 @@ int main(int argc, char* argv[])
   // Disable NMEA messages on uBlox
   x.disable_nmea();
 
+  //BDS Demo
+  std::cout << "TIMEBDS Demo" << std::endl;
+  x.ubx_send("NAV", "TIMEBDS");
+  sleep(2);
+
+  auto nav_timebds = x.fetch_ubx("NAV", "TIMEBDS");
+
+  if (ubx::nav::timebds::type(nav_timebds))
+  {
+    ubx::nav::timebds parsed = ubx::nav::timebds(nav_timebds);
+
+    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
+    std::cout << "SOW: " << parsed.sow() << "s" << std::endl;
+    std::cout << "fSOW: " << parsed.fSOW() << "ns" << std::endl;
+    std::cout << "week: " << parsed.week() << std::endl;
+    std::cout << "leapS: " << (int)parsed.leapS() << "s" << std::endl;
+
+    std::cout << "sowValid: " << (int)parsed.sowValid() << std::endl;
+    std::cout << "weekValid: " << (int)parsed.weekValid() << std::endl;
+    std::cout << "leapSValid: " << (int)parsed.leapSValid() << std::endl;
+
+    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << std::endl;
+  }
+  else std::cout << "Type error" << std::endl;
+  //BDS Demo End
+
+  //GAL Demo
+  std::cout << "TIMEGAL Demo" << std::endl;
+  x.ubx_send("NAV", "TIMEGAL");
+  sleep(2);
+
+  auto nav_timegal = x.fetch_ubx("NAV", "TIMEGAL");
+
+  if (ubx::nav::timegal::type(nav_timegal))
+  {
+    ubx::nav::timegal parsed = ubx::nav::timegal(nav_timegal);
+
+    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
+    std::cout << "galTow: " << parsed.galTow() << "s" << std::endl;
+    std::cout << "fGalTow: " << parsed.fGalTow() << "ns" << std::endl;
+    std::cout << "galWno: " << parsed.galWno() << std::endl;
+    std::cout << "leapS: " << (int)parsed.leapS() << "s" << std::endl;
+
+    std::cout << "galTowValid: " << (int)parsed.galTowValid() << std::endl;
+    std::cout << "galWnoValid: " << (int)parsed.galWnoValid() << std::endl;
+    std::cout << "leapSValid: " << (int)parsed.leapSValid() << std::endl;
+
+    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << std::endl;
+  }
+  else std::cout << "Type error" << std::endl;
+  //GAL Demo End
+
   //GLO Demo
   std::cout << "TIMEGLO Demo" << std::endl;
   x.ubx_send("NAV", "TIMEGLO");
@@ -23,15 +77,15 @@ int main(int argc, char* argv[])
     ubx::nav::timeglo parsed = ubx::nav::timeglo(nav_timeglo);
 
     std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "TOD: " << parsed.TOD() << "s" << std::endl;
+    std::cout << "tod: " << parsed.tod() << "s" << std::endl;
     std::cout << "fTOD: " << parsed.fTOD() << "ns" << std::endl;
-    std::cout << "Nt: " << parsed.Nt() << "days" << std::endl;
-    std::cout << "N4: " << (int)parsed.N4() << std::endl;
+    std::cout << "nt: " << parsed.nt() << "days" << std::endl;
+    std::cout << "n4: " << (int)parsed.n4() << std::endl;
 
     std::cout << "todValid: " << (int)parsed.todValid() << std::endl;
     std::cout << "dateValid: " << (int)parsed.dateValid() << std::endl;
 
-    std::cout << "tAcc: " << (int)parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
     std::cout << std::endl;
   }
   else std::cout << "Type error" << std::endl;
@@ -57,65 +111,11 @@ int main(int argc, char* argv[])
     std::cout << "weekValid: " << (int)parsed.weekValid() << std::endl;
     std::cout << "leapSValid: " << (int)parsed.leapSValid() << std::endl;
 
-    std::cout << "tAcc: " << (int)parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
     std::cout << std::endl;
   }
   else std::cout << "Type error" << std::endl;
   //GPS Demo End
-
-  //GAL Demo
-  std::cout << "TIMEGAL Demo" << std::endl;
-  x.ubx_send("NAV", "TIMEGAL");
-  sleep(2);
-
-  auto nav_timegal = x.fetch_ubx("NAV", "TIMEGAL");
-
-  if (ubx::nav::timegal::type(nav_timegal))
-  {
-    ubx::nav::timegal parsed = ubx::nav::timegal(nav_timegal);
-
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "galTow: " << parsed.galTow() << "s" << std::endl;
-    std::cout << "fGalTow: " << parsed.fGalTow() << "ns" << std::endl;
-    std::cout << "galWno: " << parsed.galWno() << std::endl;
-    std::cout << "leapS: " << (int)parsed.leapS() << "s" << std::endl;
-
-    std::cout << "galTowValid: " << (int)parsed.galTowValid() << std::endl;
-    std::cout << "galWnoValid: " << (int)parsed.galWnoValid() << std::endl;
-    std::cout << "leapSValid: " << (int)parsed.leapSValid() << std::endl;
-
-    std::cout << "tAcc: " << (int)parsed.tAcc() << "ns" << std::endl;
-    std::cout << std::endl;
-  }
-  else std::cout << "Type error" << std::endl;
-  //GAL Demo End
-
-//BDS Demo
-  std::cout << "TIMEBDS Demo" << std::endl;
-  x.ubx_send("NAV", "TIMEBDS");
-  sleep(2);
-
-  auto nav_timebds = x.fetch_ubx("NAV", "TIMEBDS");
-
-  if (ubx::nav::timebds::type(nav_timebds))
-  {
-    ubx::nav::timebds parsed = ubx::nav::timebds(nav_timebds);
-
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "SOW: " << parsed.SOW() << "s" << std::endl;
-    std::cout << "fSOW: " << parsed.fSOW() << "ns" << std::endl;
-    std::cout << "week: " << parsed.week() << std::endl;
-    std::cout << "leapS: " << (int)parsed.leapS() << "s" << std::endl;
-
-    std::cout << "sowValid: " << (int)parsed.sowValid() << std::endl;
-    std::cout << "weekValid: " << (int)parsed.weekValid() << std::endl;
-    std::cout << "leapSValid: " << (int)parsed.leapSValid() << std::endl;
-
-    std::cout << "tAcc: " << (int)parsed.tAcc() << "ns" << std::endl;
-    std::cout << std::endl;
-  }
-  else std::cout << "Type error" << std::endl;
-  //BDS Demo End
 
   //UTC Demo
   std::cout << "TIMEUTC Demo" << std::endl;
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 
     switch (parsed.utcStandard())
     {
-      case 0: std::cout << "Information no available" << std::endl; break;
+      case 0: std::cout << "Information not available" << std::endl; break;
       case 1: std::cout << "Communications Research Labratory (CRL)" << std::endl; break;
       case 2: std::cout << "National Institute of Standards and Technology (NIST)" << std::endl; break;
       case 3: std::cout << "U.S. Naval Observatory (USNO)" << std::endl; break;
