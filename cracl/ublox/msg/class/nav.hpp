@@ -301,7 +301,180 @@ public:
 
   static bool type(std::vector<uint8_t>& message);
 
-}; // ubx::nav::timeutc
+}; // ubx::nav::timeglo
+
+class timeglo
+{
+  uint32_t m_iTOW;
+
+  uint32_t m_TOD;
+
+  int32_t m_fTOD;
+
+  uint16_t m_Nt;
+
+  uint8_t m_N4;
+
+  uint8_t m_todValid;
+  uint8_t m_dateValid;
+
+  uint32_t m_tAcc;
+
+public:
+  timeglo(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint32_t TOD();
+
+  int32_t fTOD();
+
+  uint16_t Nt();
+
+  uint8_t N4();
+
+  uint8_t todValid();
+
+  uint8_t dateValid();
+
+  uint32_t tAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::timeglo
+
+class timegps
+{
+  uint32_t m_iTOW;
+
+  int32_t m_fTOD;
+
+  int16_t m_week;
+
+  int8_t m_leapS;
+
+  uint8_t m_towValid;
+  uint8_t m_weekValid;
+  uint8_t m_leapSValid;
+
+  uint32_t m_tAcc;
+
+public:
+  timegps(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  int32_t fTOD();
+
+  int16_t week();
+
+  int8_t leapS();
+
+  uint8_t towValid();
+  
+  uint8_t weekValid();
+  
+  uint8_t leapSValid();
+
+  uint32_t tAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::timegps
+
+class timegal
+{
+  uint32_t m_iTOW;
+
+  uint32_t m_galTow;
+
+  int32_t m_fGalTow;
+
+  int16_t m_galWno;
+
+  int8_t m_leapS;
+
+  uint8_t m_galTowValid;
+  uint8_t m_galWnoValid;
+  uint8_t m_leapSValid;
+
+  uint32_t m_tAcc;
+
+public:
+  timegal(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint32_t galTow();
+
+  int32_t fGalTow();
+
+  int16_t galWno();
+
+  int8_t leapS();
+
+  uint8_t galTowValid();
+  
+  uint8_t galWnoValid();
+  
+  uint8_t leapSValid();
+
+  uint32_t tAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::timegal
+
+class timebds
+{
+  uint32_t m_iTOW;
+
+  uint32_t m_SOW;
+
+  int32_t m_fSOW;
+
+  int16_t m_week;
+
+  int8_t m_leapS;
+
+  uint8_t m_sowValid;
+  uint8_t m_weekValid;
+  uint8_t m_leapSValid;
+
+  uint32_t m_tAcc;
+
+public:
+  timebds(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint32_t SOW();
+
+  int32_t fSOW();
+
+  int16_t week();
+
+  int8_t leapS();
+
+  uint8_t sowValid();
+
+  uint8_t weekValid();
+
+  uint8_t leapSValid();
+
+  uint32_t tAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::timebds
 
 } // namespace nav
 
