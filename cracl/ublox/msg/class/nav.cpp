@@ -552,7 +552,7 @@ bool timebds::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("NAV").first
       && message[3] == ubx::msg_map.at("NAV").second.at("TIMEBDS"));
-} // timebds
+}
 
 timegal::timegal(std::vector<uint8_t>& message)
 {
@@ -634,7 +634,7 @@ bool timegal::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("NAV").first
       && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGAL"));
-} // timegal
+}
 
 timeglo::timeglo(std::vector<uint8_t>& message)
 {
@@ -710,7 +710,7 @@ bool timeglo::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("NAV").first
       && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGLO"));
-} // timeglo
+}
 
 timegps::timegps(std::vector<uint8_t>& message)
 {
@@ -785,7 +785,7 @@ bool timegps::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("NAV").first
       && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGPS"));
-} // timegps
+}
 
 timeutc::timeutc(std::vector<uint8_t>& message)
 {
@@ -890,7 +890,7 @@ bool timeutc::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("NAV").first
       && message[3] == ubx::msg_map.at("NAV").second.at("TIMEUTC"));
-} // timeutc
+}
 
 } // namespace nav
 
