@@ -1,6 +1,6 @@
-#include <iostream>
-
 #include <cracl/ublox/m8.hpp>
+
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
