@@ -14,6 +14,9 @@ Sending of all UBX messages should be supported, though not fully tested. When s
 PUBX messages with the u-blox are similar, just pass whatever you want into the `pubx_send` function. NMEA messages are returned as strings for you to parse yourself.
 
 We use Ubuntu 18.04 and 16.04, but it should theoretically be portable, you'll just need Boost ASIO.
+```
+sudo apt install libboost-all-dev
+```
 
 A Makefile is included which generates a shared library file to link against. After including the headers in your code, just link against the library.
 
