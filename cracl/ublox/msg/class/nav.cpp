@@ -482,7 +482,6 @@ void timebds::update(std::vector<uint8_t>& message)
   if (type(message))
   {
     m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
-
     m_SOW = (*(reinterpret_cast<uint32_t*> (&message[10])));
 
     m_fSOW = (*(reinterpret_cast<int32_t*> (&message[14])));
@@ -564,7 +563,6 @@ void timegal::update(std::vector<uint8_t>& message)
   if (type(message))
   {
     m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
-
     m_galTow = (*(reinterpret_cast<uint32_t*> (&message[10])));
 
     m_fGalTow = (*(reinterpret_cast<int32_t*> (&message[14])));
@@ -646,7 +644,6 @@ void timeglo::update(std::vector<uint8_t>& message)
   if (type(message))
   {
     m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
-
     m_TOD = (*(reinterpret_cast<uint32_t*> (&message[10])));
 
     m_fTOD = (*(reinterpret_cast<int32_t*> (&message[14])));
@@ -797,7 +794,6 @@ void timeutc::update(std::vector<uint8_t>& message)
   if (type(message))
   {
     m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
-
     m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[10])));
 
     m_nano = (*(reinterpret_cast<int32_t*> (&message[14])));

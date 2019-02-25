@@ -250,7 +250,6 @@ public:
 class timebds
 {
   uint32_t m_iTOW;
-
   uint32_t m_SOW;
 
   int32_t m_fSOW;
@@ -295,7 +294,6 @@ public:
 class timegal
 {
   uint32_t m_iTOW;
-
   uint32_t m_galTow;
 
   int32_t m_fGalTow;
@@ -340,7 +338,6 @@ public:
 class timeglo
 {
   uint32_t m_iTOW;
-
   uint32_t m_TOD;
 
   int32_t m_fTOD;
@@ -348,7 +345,6 @@ class timeglo
   uint16_t m_Nt;
 
   uint8_t m_N4;
-
   uint8_t m_todValid;
   uint8_t m_dateValid;
 
@@ -423,7 +419,6 @@ public:
 class timeutc
 {
   uint32_t m_iTOW;
-
   uint32_t m_tAcc;
 
   int32_t m_nano;
