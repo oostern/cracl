@@ -100,6 +100,10 @@ public:
    */
   void gps_gprmc(size_t freq);
 
+  /* @brief Function to query the position and velocity of the GPS receiver
+   */
+  void gps_pos();
+
   /* @brief Function to instruct teh GPSDO to transmit X, Y, and Z speed
    *        including centimeter-level accuracy estimates at a specified
    *        frequency

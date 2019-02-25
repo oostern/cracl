@@ -158,6 +158,11 @@ void firefly_1a::gps_xyzsp(size_t freq)
     write("GPS:XYZSP " + std::to_string(freq) + "\r\n");
 }
 
+void firefly_1a::gps_pos()
+{
+  write("GPS:POS?\r\n");
+}
+
 void firefly_1a::ptim()
 {
   write("PTIM?\r\n");

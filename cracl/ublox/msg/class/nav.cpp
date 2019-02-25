@@ -472,6 +472,318 @@ bool status::type(std::vector<uint8_t>& message)
       && message[3] == ubx::msg_map.at("NAV").second.at("STATUS"));
 }
 
+timebds::timebds(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void timebds::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+    m_SOW = (*(reinterpret_cast<uint32_t*> (&message[10])));
+
+    m_fSOW = (*(reinterpret_cast<int32_t*> (&message[14])));
+
+    m_week = (*(reinterpret_cast<int16_t*> (&message[18])));
+
+    m_leapS = (*(reinterpret_cast<int8_t*> (&message[20])));
+
+    m_sowValid = message[21] & 0x01;
+    m_weekValid = message[21] >> 1 & 0x01;
+    m_leapSValid = message[21] >> 2 & 0x01;
+
+    m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t timebds::iTOW()
+{
+  return m_iTOW;
+}
+
+uint32_t timebds::sow()
+{
+  return m_SOW;
+}
+
+int32_t timebds::fSOW()
+{
+  return m_fSOW;
+}
+
+int16_t timebds::week()
+{
+  return m_week;
+}
+
+int8_t timebds::leapS()
+{
+  return m_leapS;
+}
+
+uint8_t timebds::sowValid()
+{
+  return m_sowValid;
+}
+
+uint8_t timebds::weekValid()
+{
+  return m_weekValid;
+}
+
+uint8_t timebds::leapSValid()
+{
+  return m_leapSValid;
+}
+
+uint32_t timebds::tAcc()
+{
+  return m_tAcc;
+}
+
+bool timebds::type(std::vector<uint8_t>& message)
+{
+   return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("TIMEBDS"));
+}
+
+timegal::timegal(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void timegal::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+    m_galTow = (*(reinterpret_cast<uint32_t*> (&message[10])));
+
+    m_fGalTow = (*(reinterpret_cast<int32_t*> (&message[14])));
+
+    m_galWno = (*(reinterpret_cast<int16_t*> (&message[18])));
+
+    m_leapS = (*(reinterpret_cast<int8_t*> (&message[20])));
+
+    m_galTowValid = message[21] & 0x01;
+    m_galWnoValid = message[21] >> 1 & 0x01;
+    m_leapSValid = message[21] >> 2 & 0x01;
+
+    m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t timegal::iTOW()
+{
+  return m_iTOW;
+}
+
+uint32_t timegal::galTow()
+{
+  return m_galTow;
+}
+
+int32_t timegal::fGalTow()
+{
+  return m_fGalTow;
+}
+
+int16_t timegal::galWno()
+{
+  return m_galWno;
+}
+
+int8_t timegal::leapS()
+{
+  return m_leapS;
+}
+
+uint8_t timegal::galTowValid()
+{
+  return m_galTowValid;
+}
+
+uint8_t timegal::galWnoValid()
+{
+  return m_galWnoValid;
+}
+
+uint8_t timegal::leapSValid()
+{
+  return m_leapSValid;
+}
+
+uint32_t timegal::tAcc()
+{
+  return m_tAcc;
+}
+
+bool timegal::type(std::vector<uint8_t>& message)
+{
+   return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGAL"));
+}
+
+timeglo::timeglo(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void timeglo::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+    m_TOD = (*(reinterpret_cast<uint32_t*> (&message[10])));
+
+    m_fTOD = (*(reinterpret_cast<int32_t*> (&message[14])));
+
+    m_Nt = (*(reinterpret_cast<uint16_t*> (&message[18])));
+
+    m_N4 = message[20];
+
+    m_todValid = message[21] & 0x01;
+    m_dateValid = message[21] >> 1 & 0x01;
+
+    m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[22])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t timeglo::iTOW()
+{
+  return m_iTOW;
+}
+
+uint32_t timeglo::tod()
+{
+  return m_TOD;
+}
+
+int32_t timeglo::fTOD()
+{
+  return m_fTOD;
+}
+
+uint16_t timeglo::nt()
+{
+  return m_Nt;
+}
+
+uint8_t timeglo::n4()
+{
+  return m_N4;
+}
+
+uint8_t timeglo::todValid()
+{
+  return m_todValid;
+}
+
+uint8_t timeglo::dateValid()
+{
+  return m_dateValid;
+}
+
+uint32_t timeglo::tAcc()
+{
+  return m_tAcc;
+}
+
+bool timeglo::type(std::vector<uint8_t>& message)
+{
+   return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGLO"));
+}
+
+timegps::timegps(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void timegps::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_fTOD = (*(reinterpret_cast<int32_t*> (&message[10])));
+
+    m_week = (*(reinterpret_cast<int16_t*> (&message[14])));
+
+    m_leapS = (*(reinterpret_cast<int8_t*> (&message[16])));
+
+    m_towValid = message[17] & 0x01;
+    m_weekValid = message[17] >> 1 & 0x01;
+    m_leapSValid = message[17] >> 2 & 0x01;
+
+    m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[18])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t timegps::iTOW()
+{
+  return m_iTOW;
+}
+
+int32_t timegps::fTOD()
+{
+  return m_fTOD;
+}
+
+int16_t timegps::week()
+{
+  return m_week;
+}
+
+int8_t timegps::leapS()
+{
+  return m_leapS;
+}
+
+uint8_t timegps::towValid()
+{
+  return m_towValid;
+}
+
+uint8_t timegps::weekValid()
+{
+  return m_weekValid;
+}
+
+uint8_t timegps::leapSValid()
+{
+  return m_leapSValid;
+}
+
+uint32_t timegps::tAcc()
+{
+  return m_tAcc;
+}
+
+bool timegps::type(std::vector<uint8_t>& message)
+{
+   return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("TIMEGPS"));
+}
+
 timeutc::timeutc(std::vector<uint8_t>& message)
 {
   update(message);
@@ -482,7 +794,6 @@ void timeutc::update(std::vector<uint8_t>& message)
   if (type(message))
   {
     m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
-
     m_tAcc = (*(reinterpret_cast<uint32_t*> (&message[10])));
 
     m_nano = (*(reinterpret_cast<int32_t*> (&message[14])));

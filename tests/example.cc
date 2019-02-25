@@ -1,8 +1,8 @@
-#include <iostream>
-
 #include <cracl/microsemi/sa45s.hpp>
 #include <cracl/jackson_labs/firefly_1a.hpp>
 #include <cracl/ublox/m8.hpp>
+
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
   firefly_1a g("/dev/ttyUSB0");
   sa45s c("/dev/ttyUSB1");
 
-  // Test connectioon with CSAC
+  // Test connection with CSAC
   c.write("!^\r\n");
   sleep(2);
 
