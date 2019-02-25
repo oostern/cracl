@@ -1,0 +1,5 @@
+Documentation
+
+Requirements for fresh xubuntu
+	1. sudo apt install make
+	2. sudo apt-get install libboost-all-dev
