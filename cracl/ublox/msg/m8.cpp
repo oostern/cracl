@@ -1,8 +1,7 @@
-#include "base.hpp"
+#include "m8.hpp"
 
 #include <map>
 #include <string>
-#include <vector>
 
 namespace cracl
 {
@@ -12,7 +11,7 @@ namespace ubx
 
 extern const std::map<std::string,
        std::pair<uint8_t, std::map<std::string, uint8_t>>>
-  msg_map = {
+  m8_map = {
     { "ACK",
       { 0x05,
         {
@@ -67,9 +66,6 @@ extern const std::map<std::string,
           { "TMODE3", 0x71 },
           { "TP5", 0x31 },
           { "TXSLOT", 0x53 },
-          { "VALDEL", 0x8c },
-          { "VALGET", 0x8b },
-          { "VALSET", 0x8a },
           { "USB", 0x1b }
         }
       }
@@ -136,15 +132,12 @@ extern const std::map<std::string,
     { "MON",
       { 0x0a,
         {
-          { "COMMS", 0x36 },
           { "GNSS", 0x28 },
           { "HW2", 0x0b },
-          { "HW3", 0x37 },
           { "HW", 0x09 },
           { "IO", 0x02 },
           { "MSGPP", 0x06 },
           { "PATCH", 0x27 },
-          { "RF", 0x38 },
           { "RXBUF", 0x07 },
           { "RXR", 0x21 },
           { "SMGR", 0x2e },
@@ -174,7 +167,6 @@ extern const std::map<std::string,
           { "RESETODO", 0x10 },
           { "SAT", 0x35 },
           { "SBAS", 0x32 },
-          { "SIG", 0x43 },
           { "SOL", 0x06 },
           { "STATUS", 0x03 },
           { "SVINFO", 0x30 },
@@ -247,21 +239,6 @@ extern const std::map<std::string,
       }
     }
   };
-
-/* @brief Compute 8-bit Fletcher checksum and compare it to values in a given
- *        message
- */
-extern bool valid_checksum(std::vector<uint8_t>& message)
-{
-  size_t i;
-  uint8_t check_a = 0;
-  uint8_t check_b = 0;
-
-  for (i = 2; i < message.size() - 2; ++i)
-    check_b += (check_a += message[i]);
-
-  return (check_a == message[i] && check_b == message[i + 1]);
-}
 
 } // namespace ubx
 

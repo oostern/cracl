@@ -1,11 +1,11 @@
-#include "m8.hpp"
+#include "f9.hpp"
 
 #include "../base/device.hpp"
 
 namespace cracl
 {
 
-m8::m8(const std::string& location, size_t baud_rate, size_t timeout,
+f9::f9(const std::string& location, size_t baud_rate, size_t timeout,
     size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity,
     port_base::flow_control::type flow_control,
@@ -14,7 +14,7 @@ m8::m8(const std::string& location, size_t baud_rate, size_t timeout,
     max_handlers, parity, flow_control, stop_bits)
 { }
 
-std::vector<uint8_t> m8::fetch_ubx(std::string&& msg_class,
+std::vector<uint8_t> f9::fetch_ubx(std::string&& msg_class,
     std::string&& msg_id, bool first_try)
 {
   size_t i;

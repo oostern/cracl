@@ -1,5 +1,5 @@
-#ifndef CRACL_UBLOX_MSG_M8_HPP
-#define CRACL_UBLOX_MSG_M8_HPP
+#ifndef CRACL_UBLOX_MSG_F9_HPP
+#define CRACL_UBLOX_MSG_F9_HPP
 
 #include "base.hpp"
 
@@ -15,10 +15,10 @@ namespace ubx
 
 extern const std::map<std::string,
        std::pair<uint8_t, std::map<std::string, uint8_t>>>
-  m8_map;
+  f9_map;
 
 }
 
 }
 
-#endif // CRACL_UBLOX_MSG_M8_HPP
+#endif // CRACL_UBLOX_MSG_F9_HPP

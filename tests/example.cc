@@ -8,8 +8,8 @@ int main(int argc, char* argv[])
 {
   using namespace cracl;
 
-  m8 x("/dev/ttyACM1");
-  firefly_1a g("/dev/ttyUSB0");
+  m8 x("/dev/ttyACM0");
+  firefly_1a g("/dev/ttyS7");
   sa45s c("/dev/ttyUSB1");
 
   // Test connection with CSAC

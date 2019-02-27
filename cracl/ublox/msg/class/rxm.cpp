@@ -3,6 +3,7 @@
 #include "../base.hpp"
 
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace cracl
