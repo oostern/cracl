@@ -1,8 +1,7 @@
-#include "base.hpp"
+#include "m8.hpp"
 
 #include <map>
 #include <string>
-#include <vector>
 
 namespace cracl
 {
@@ -12,7 +11,7 @@ namespace ubx
 
 extern const std::map<std::string,
        std::pair<uint8_t, std::map<std::string, uint8_t>>>
-  msg_map = {
+  m8_map = {
     { "ACK",
       { 0x05,
         {
@@ -150,6 +149,7 @@ extern const std::map<std::string,
     { "NAV",
       { 0x01,
         {
+          { "M8TEST", 0x60 },
           { "AOPSTATUS", 0x60 },
           { "ATT", 0x05 },
           { "CLOCK", 0x22 },
@@ -240,21 +240,6 @@ extern const std::map<std::string,
       }
     }
   };
-
-/* @brief Compute 8-bit Fletcher checksum and compare it to values in a given
- *        message
- */
-extern bool valid_checksum(std::vector<uint8_t>& message)
-{
-  size_t i;
-  uint8_t check_a = 0;
-  uint8_t check_b = 0;
-
-  for (i = 2; i < message.size() - 2; ++i)
-    check_b += (check_a += message[i]);
-
-  return (check_a == message[i] && check_b == message[i + 1]);
-}
 
 } // namespace ubx
 
