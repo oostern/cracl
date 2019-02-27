@@ -149,7 +149,6 @@ extern const std::map<std::string,
     { "NAV",
       { 0x01,
         {
-          { "M8TEST", 0x60 },
           { "AOPSTATUS", 0x60 },
           { "ATT", 0x05 },
           { "CLOCK", 0x22 },

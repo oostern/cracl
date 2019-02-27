@@ -3,9 +3,9 @@
 ## Common Receiver And Clock Library
 
 A library to interface with various devices, including
-* u-blox receivers (e.g. M8T and M6T)
-* Jackson Labs oscillators (e.g. Firefly-1A, the OCXO used in USRP N2XX)
-* Microsemi clocks (e.g. sa45s CSAC and GPS300)
+* u-blox receivers (e.g. F9P, M8T, M6T)
+* Jackson Labs oscillators (e.g. Firefly-1A - the OCXO used in USRP N2XX)
+* Microsemi clocks (e.g. sa45s CSAC, GPS300)
 
 Feature development has been laregly as needed, though the non-UBX stuff is pretty simple and therefore mostly complete.
 
