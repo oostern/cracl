@@ -197,6 +197,54 @@ public:
 
 }; // ubx::nav::sat
 
+class sig
+{
+  uint32_t m_iTOW;
+
+  uint8_t m_version;
+  uint8_t m_numSigs;
+
+  std::vector<uint8_t> m_gnssId;
+  std::vector<uint8_t> m_svId;
+  std::vector<uint8_t> m_sigId;
+  std::vector<uint8_t> m_freqId;
+
+  std::vector<int16_t> m_prRes;
+
+  std::vector<uint8_t> m_cno;
+  std::vector<uint8_t> m_qualityInd;
+  std::vector<uint8_t> m_corrSource;
+  std::vector<uint8_t> m_ionoModel;
+
+public:
+  sig(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  uint8_t version();
+
+  uint8_t numSigs();
+
+  std::vector<uint8_t> gnssId();
+
+  std::vector<uint8_t> svId();
+
+  std::vector<uint8_t> sigId();
+
+  std::vector<uint8_t> freqId();
+
+  std::vector<uint8_t> cno();
+
+  std::vector<int16_t> prRes();
+
+  std::vector<uint8_t> qualityInd();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::sig
+
 class status
 {
   uint32_t m_iTOW;
