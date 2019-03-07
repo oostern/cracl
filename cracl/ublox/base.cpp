@@ -101,7 +101,7 @@ void ublox_base::buffer_messages()
       // Interpret length from bytes fetched so far
       uint16_t length = *(reinterpret_cast<uint16_t *> (&message[4])) + 2;
 
-      if (length > 1024)        // If length is absurdly large assume it's
+      if (length > 4096)        // If length is absurdly large assume it's
         continue;               //   incorrect, jump out
 
       message.reserve(6 + length);
