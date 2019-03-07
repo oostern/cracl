@@ -394,6 +394,160 @@ bool sat::type(std::vector<uint8_t>& message)
       && message[3] == ubx::msg_map.at("NAV").second.at("SAT"));
 }
 
+sig::sig(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void sig::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_version = message[10];
+    m_numSigs = message[11];
+
+    for (size_t i = 0; i < m_numSigs; ++i)
+    {
+      m_gnssId.push_back(message[14 + (i * 16)]);
+      m_svId.push_back(message[15 + (i * 16)]);
+      m_sigId.push_back(message[16 + (i * 16)]);
+      m_freqId.push_back(message[17 + (i * 16)]);
+
+      m_prRes.push_back(
+          *(reinterpret_cast<uint16_t*> (&message[18 + (i * 16)])));
+
+      m_cno.push_back(message[20 + (i * 16)]);
+      m_qualityInd.push_back(message[21 + (i * 16)]);
+      m_corrSource.push_back(message[22 + (i * 16)]);
+      m_ionoModel.push_back(message[23 + (i * 16)]);
+
+      uint16_t bitfield
+        = (*(reinterpret_cast<uint16_t*> (&message[18 + (i * 16)])));
+
+      m_health.push_back(bitfield & 0x03);
+      m_prSmoothed.push_back(bitfield >> 2 & 0x01);
+      m_prUsed.push_back(bitfield >> 3 & 0x01);
+      m_crUsed.push_back(bitfield >> 4 & 0x01);
+      m_doUsed.push_back(bitfield >> 5 & 0x01);
+      m_prCorrUsed.push_back(bitfield >> 6 & 0x01);
+      m_crCorrUsed.push_back(bitfield >> 7 & 0x01);
+      m_doCorrUsed.push_back(bitfield >> 8 & 0x01);
+    }
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t sig::iTOW()
+{
+  return m_iTOW;
+}
+
+uint8_t sig::version()
+{
+  return m_version;
+}
+
+uint8_t sig::numSigs()
+{
+  return m_numSigs;
+}
+
+std::vector<uint8_t> sig::gnssId()
+{
+  return m_gnssId;
+}
+
+std::vector<uint8_t> sig::svId()
+{
+  return m_svId;
+}
+
+std::vector<uint8_t> sig::sigId()
+{
+  return m_sigId;
+}
+
+std::vector<uint8_t> sig::freqId()
+{
+  return m_freqId;
+}
+
+std::vector<int16_t> sig::prRes()
+{
+  return m_prRes;
+}
+
+std::vector<uint8_t> sig::cno()
+{
+  return m_cno;
+}
+
+std::vector<uint8_t> sig::qualityInd()
+{
+  return m_qualityInd;
+}
+
+std::vector<uint8_t> sig::corrSource()
+{
+  return m_corrSource;
+}
+
+std::vector<uint8_t> sig::ionoModel()
+{
+  return m_ionoModel;
+}
+
+std::vector<uint8_t> sig::health()
+{
+  return m_health;
+}
+
+std::vector<uint8_t> sig::prSmoothed()
+{
+  return m_prSmoothed;
+}
+
+std::vector<uint8_t> sig::prUsed()
+{
+  return m_prUsed;
+}
+
+std::vector<uint8_t> sig::crUsed()
+{
+  return m_crUsed;
+}
+
+std::vector<uint8_t> sig::doUsed()
+{
+  return m_doUsed;
+}
+
+std::vector<uint8_t> sig::prCorrUsed()
+{
+  return m_prCorrUsed;
+}
+
+std::vector<uint8_t> sig::crCorrUsed()
+{
+  return m_crCorrUsed;
+}
+
+std::vector<uint8_t> sig::doCorrUsed()
+{
+  return m_doCorrUsed;
+}
+
+bool sig::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("SIG"));
+}
+
 status::status(std::vector<uint8_t>& message)
 {
   update(message);
