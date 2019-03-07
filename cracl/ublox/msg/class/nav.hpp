@@ -216,6 +216,15 @@ class sig
   std::vector<uint8_t> m_corrSource;
   std::vector<uint8_t> m_ionoModel;
 
+  std::vector<uint8_t> m_health;
+  std::vector<uint8_t> m_prSmoothed;
+  std::vector<uint8_t> m_prUsed;
+  std::vector<uint8_t> m_crUsed;
+  std::vector<uint8_t> m_doUsed;
+  std::vector<uint8_t> m_prCorrUsed;
+  std::vector<uint8_t> m_crCorrUsed;
+  std::vector<uint8_t> m_doCorrUsed;
+
 public:
   sig(std::vector<uint8_t>& message);
 
@@ -235,11 +244,31 @@ public:
 
   std::vector<uint8_t> freqId();
 
-  std::vector<uint8_t> cno();
-
   std::vector<int16_t> prRes();
 
+  std::vector<uint8_t> cno();
+
   std::vector<uint8_t> qualityInd();
+
+  std::vector<uint8_t> corrSource();
+
+  std::vector<uint8_t> ionoModel();
+
+  std::vector<uint8_t> health();
+
+  std::vector<uint8_t> prSmoothed();
+
+  std::vector<uint8_t> prUsed();
+
+  std::vector<uint8_t> crUsed();
+
+  std::vector<uint8_t> doUsed();
+
+  std::vector<uint8_t> prCorrUsed();
+
+  std::vector<uint8_t> crCorrUsed();
+
+  std::vector<uint8_t> doCorrUsed();
 
   static bool type(std::vector<uint8_t>& message);
 
