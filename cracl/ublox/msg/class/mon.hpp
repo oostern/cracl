@@ -107,6 +107,66 @@ public:
 
 }; // ubx::mon::hw
 
+class rf
+{
+  uint8_t m_version;
+  uint8_t m_nBlocks;
+
+  std::vector<uint8_t> m_blockId;
+  std::vector<uint8_t> m_jammingState;
+  std::vector<uint8_t> m_antStatus;
+  std::vector<uint8_t> m_antPower;
+
+  std::vector<uint32_t> m_postStatus;
+
+  std::vector<uint16_t> m_noisePerMS;
+  std::vector<uint16_t> m_agcCnt;
+
+  std::vector<uint8_t> m_jamInd;
+
+  std::vector<int8_t> m_ofsI;
+
+  std::vector<uint8_t> m_magI;
+
+  std::vector<int8_t> m_ofsQ;
+
+  std::vector<uint8_t> m_magQ;
+
+public:
+  rf(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint8_t version();
+
+  uint8_t nBlocks();
+
+  std::vector<uint8_t> blockId();
+
+  std::vector<uint8_t> jammingState();
+
+  std::vector<uint8_t> antStatus();
+
+  std::vector<uint32_t> postStatus();
+
+  std::vector<uint16_t> noisePerMS();
+
+  std::vector<uint16_t> agcCnt();
+
+  std::vector<uint8_t> jamInd();
+
+  std::vector<int8_t> ofsI();
+
+  std::vector<uint8_t> magI();
+
+  std::vector<int8_t> ofsQ();
+
+  std::vector<uint8_t> magQ();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::mon::rf
+
 } // namespace mon
 
 } // namespace ubx

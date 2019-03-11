@@ -59,15 +59,16 @@ void hw::update(std::vector<uint8_t>& message)
     uint8_t bitfield = message[28];
 
     m_rtcCalib = bitfield & 0x01;
-    m_safeBoot = bitfield & 0x02;
-    m_jammingState = bitfield & 0x0C;
-    m_xtalAbsent = bitfield & 0x10;
+    m_safeBoot = bitfield >> 1 & 0x01;
+    m_jammingState = bitfield >> 2 & 0x03;
+    m_xtalAbsent = bitfield >> 4 & 0x01;
 
     m_usedMask = (*(reinterpret_cast<uint32_t*> (&message[30])));
 
     std::memcpy(m_vp.data(), &message[34], 17);
 
     m_jamInd = message[51];
+
     m_pinIrq = (*(reinterpret_cast<uint32_t*> (&message[54])));
     m_pullH = (*(reinterpret_cast<uint32_t*> (&message[58])));
     m_pullL = (*(reinterpret_cast<uint32_t*> (&message[62])));
@@ -172,6 +173,123 @@ bool hw::type(std::vector<uint8_t>& message)
       && valid_checksum(message)
       && message[2] == ubx::msg_map.at("MON").first
       && message[3] == ubx::msg_map.at("MON").second.at("HW"));
+}
+
+rf::rf(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void rf::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_version = message[6];
+    m_nBlocks = message[7];
+
+    for (size_t i = 0; i < m_nBlocks; ++i)
+    {
+      m_blockId.push_back(message[10 + (i * 24)]);
+
+      m_jammingState.push_back(message[11 + (i * 24)] & 0x03);
+
+      m_antStatus.push_back(message[12 + (i * 24)]);
+      m_antPower.push_back(message[13 + (i * 24)]);
+
+      m_postStatus.push_back(
+        *(reinterpret_cast<uint32_t*> (&message[14 + (i * 24)])));
+
+      m_noisePerMS.push_back(
+        *(reinterpret_cast<uint16_t*> (&message[22 + (i * 24)])));
+      m_agcCnt.push_back(
+        *(reinterpret_cast<uint16_t*> (&message[24 + (i * 24)])));
+
+      m_jamInd.push_back(message[26 + (i * 24)]);
+
+      m_ofsI.push_back(*(reinterpret_cast<int8_t*> (&message[27 + (i * 24)])));
+
+      m_magI.push_back(message[28 + (i * 24)]);
+
+      m_ofsQ.push_back(*(reinterpret_cast<int8_t*> (&message[29 + (i * 24)])));
+
+      m_magQ.push_back(message[20 + (i * 24)]);
+    }
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint8_t rf::version()
+{
+  return m_version;
+}
+
+uint8_t rf::nBlocks()
+{
+  return m_nBlocks;
+}
+
+std::vector<uint8_t> rf::blockId()
+{
+  return m_blockId;
+}
+
+std::vector<uint8_t> rf::jammingState()
+{
+  return m_jammingState;
+}
+
+std::vector<uint8_t> rf::antStatus()
+{
+  return m_antStatus;
+}
+
+std::vector<uint32_t> rf::postStatus()
+{
+  return m_postStatus;
+}
+
+std::vector<uint16_t> rf::noisePerMS()
+{
+  return m_noisePerMS;
+}
+
+std::vector<uint16_t> rf::agcCnt()
+{
+  return m_agcCnt;
+}
+
+std::vector<uint8_t> rf::jamInd()
+{
+  return m_jamInd;
+}
+
+std::vector<int8_t> rf::ofsI()
+{
+  return m_ofsI;
+}
+
+std::vector<uint8_t> rf::magI()
+{
+  return m_magI;
+}
+
+std::vector<int8_t> rf::ofsQ()
+{
+  return m_ofsQ;
+}
+
+std::vector<uint8_t> rf::magQ()
+{
+  return m_magQ;
+}
+
+bool rf::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("MON").first
+      && message[3] == ubx::msg_map.at("MON").second.at("RF"));
 }
 
 } // namespace mon
