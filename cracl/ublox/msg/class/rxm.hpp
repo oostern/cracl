@@ -67,6 +67,8 @@ class measx
   std::vector<uint8_t> m_pseuRangeRMSErr;
 
 public:
+  measx(){ }
+
   measx(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -150,6 +152,8 @@ class rawx
   std::vector<uint8_t> m_trkStat;
 
 public:
+  rawx(){ }
+
   rawx(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);

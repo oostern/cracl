@@ -45,6 +45,8 @@ class clock
   uint32_t m_fAcc;
 
 public:
+  clock(){ }
+
   clock(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -76,6 +78,8 @@ class dop
   uint16_t m_eDOP;
 
 public:
+  dop(){ }
+
   dop(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -111,6 +115,8 @@ class posecef
   uint32_t m_pAcc;
 
 public:
+  posecef(){ }
+
   posecef(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -162,6 +168,8 @@ class sat
   std::vector<uint8_t> m_doCorrUsed;
 
 public:
+  sat(){ }
+
   sat(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -247,6 +255,8 @@ class sig
   std::vector<uint8_t> m_doCorrUsed;
 
 public:
+  sig(){ }
+
   sig(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -313,6 +323,8 @@ class status
   uint32_t m_msss;
 
 public:
+  status(){ }
+
   status(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -363,6 +375,8 @@ class timebds
   uint32_t m_tAcc;
 
 public:
+  timebds(){ }
+
   timebds(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -407,6 +421,8 @@ class timegal
   uint32_t m_tAcc;
 
 public:
+  timegal(){ }
+
   timegal(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -449,6 +465,8 @@ class timeglo
   uint32_t m_tAcc;
 
 public:
+  timeglo(){ }
+
   timeglo(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -490,6 +508,8 @@ class timegps
   uint32_t m_tAcc;
 
 public:
+  timegps(){ }
+
   timegps(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -535,6 +555,8 @@ class timeutc
   uint8_t m_utcStandard;
 
 public:
+  timeutc(){ }
+
   timeutc(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
