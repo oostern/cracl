@@ -141,6 +141,7 @@ class rawx
 
   std::vector<uint8_t> m_gnssId;
   std::vector<uint8_t> m_svId;
+  std::vector<uint8_t> m_sigId;
   std::vector<uint8_t> m_freqId;
 
   std::vector<uint16_t> m_locktime;
@@ -181,6 +182,8 @@ public:
   std::vector<uint8_t> gnssId();
 
   std::vector<uint8_t> svId();
+
+  std::vector<uint8_t> sigId();
 
   std::vector<uint8_t> freqId();
 
