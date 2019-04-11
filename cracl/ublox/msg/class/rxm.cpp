@@ -235,6 +235,7 @@ void rawx::update(std::vector<uint8_t>& message)
 
       m_gnssId.push_back(message[42 + (i * 32)]);
       m_svId.push_back(message[43 + (i * 32)]);
+      m_sigId.push_back(message[44 + (i * 32)]);
       m_freqId.push_back(message[45 + (i * 32)]);
 
       m_locktime.push_back(
@@ -309,6 +310,11 @@ std::vector<uint8_t> rawx::gnssId()
 std::vector<uint8_t> rawx::svId()
 {
   return m_svId;
+}
+
+std::vector<uint8_t> rawx::sigId()
+{
+  return m_sigId;
 }
 
 std::vector<uint8_t> rawx::freqId()

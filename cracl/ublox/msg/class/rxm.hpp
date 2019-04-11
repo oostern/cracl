@@ -67,6 +67,8 @@ class measx
   std::vector<uint8_t> m_pseuRangeRMSErr;
 
 public:
+  measx(){ }
+
   measx(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -139,6 +141,7 @@ class rawx
 
   std::vector<uint8_t> m_gnssId;
   std::vector<uint8_t> m_svId;
+  std::vector<uint8_t> m_sigId;
   std::vector<uint8_t> m_freqId;
 
   std::vector<uint16_t> m_locktime;
@@ -150,6 +153,8 @@ class rawx
   std::vector<uint8_t> m_trkStat;
 
 public:
+  rawx(){ }
+
   rawx(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -177,6 +182,8 @@ public:
   std::vector<uint8_t> gnssId();
 
   std::vector<uint8_t> svId();
+
+  std::vector<uint8_t> sigId();
 
   std::vector<uint8_t> freqId();
 

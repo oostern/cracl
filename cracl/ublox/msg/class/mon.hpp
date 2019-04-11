@@ -63,6 +63,8 @@ class hw
   uint32_t m_pullL;
 
 public:
+  hw(){ };
+
   hw(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
@@ -133,6 +135,8 @@ class rf
   std::vector<uint8_t> m_magQ;
 
 public:
+  rf(){ };
+
   rf(std::vector<uint8_t>& message);
 
   void update(std::vector<uint8_t>& message);
