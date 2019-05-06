@@ -229,6 +229,28 @@ void sat::update(std::vector<uint8_t>& message)
     m_version = message[10];
     m_numSvs = message[11];
 
+    m_gnssId.clear();
+    m_svId.clear();
+    m_cno.clear();
+    m_elev.clear();
+    m_azim.clear();
+    m_prRes.clear();
+    m_qualityInd.clear();
+    m_svUsed.clear();
+    m_health.clear();
+    m_diffCorr.clear();
+    m_smoothed.clear();
+    m_orbitSource.clear();
+    m_ephAvail.clear();
+    m_almAvail.clear();
+    m_anoAvail.clear();
+    m_aopAvail.clear();
+    m_sbasCorrUsed.clear();
+    m_rtcmCorrUsed.clear();
+    m_prCorrUsed.clear();
+    m_crCorrUsed.clear();
+    m_doCorrUsed.clear();
+
     for (size_t i = 0; i < m_numSvs; ++i)
     {
       m_gnssId.push_back(message[14 + (i * 12)]);
@@ -407,6 +429,24 @@ void sig::update(std::vector<uint8_t>& message)
 
     m_version = message[10];
     m_numSigs = message[11];
+
+    m_gnssId.clear();
+    m_svId.clear();
+    m_sigId.clear();
+    m_freqId.clear();
+    m_prRes.clear();
+    m_cno.clear();
+    m_qualityInd.clear();
+    m_corrSource.clear();
+    m_ionoModel.clear();
+    m_health.clear();
+    m_prSmoothed.clear();
+    m_prUsed.clear();
+    m_crUsed.clear();
+    m_doUsed.clear();
+    m_prCorrUsed.clear();
+    m_crCorrUsed.clear();
+    m_doCorrUsed.clear();
 
     for (size_t i = 0; i < m_numSigs; ++i)
     {
