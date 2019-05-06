@@ -59,6 +59,18 @@ void measx::update(std::vector<uint8_t>& message)
     m_numSV = message[40];
     m_towSet = message[41] & 0x03;
 
+    m_gnssId.clear();
+    m_svId.clear();
+    m_cNo.clear();
+    m_mpathIndic.clear();
+    m_dopplerMS.clear();
+    m_dopplerHz.clear();
+    m_wholeChips.clear();
+    m_fracChips.clear();
+    m_codePhase.clear();
+    m_intCodePhase.clear();
+    m_pseuRangeRMSErr.clear();
+
     for (size_t i = 0; i < m_numSV; ++i)
     {
       m_gnssId.push_back(message[50 + (i * 24)]);
@@ -225,6 +237,20 @@ void rawx::update(std::vector<uint8_t>& message)
 
     m_leapSec = m_recStat & 0x01;
     m_clkReset = m_recStat & 0x02;
+
+    m_prMes.clear();
+    m_cpMes.clear();
+    m_doMes.clear();
+    m_gnssId.clear();
+    m_svId.clear();
+    m_sigId.clear();
+    m_freqId.clear();
+    m_locktime.clear();
+    m_cno.clear();
+    m_prStdev.clear();
+    m_cpStdev.clear();
+    m_doStdev.clear();
+    m_trkStat.clear();
 
     for (size_t i = 0; i < m_numMeas; ++i)
     {

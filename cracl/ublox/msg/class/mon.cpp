@@ -187,6 +187,19 @@ void rf::update(std::vector<uint8_t>& message)
     m_version = message[6];
     m_nBlocks = message[7];
 
+    m_blockId.clear();
+    m_jammingState.clear();
+    m_antStatus.clear();
+    m_antPower.clear();
+    m_postStatus.clear();
+    m_noisePerMS.clear();
+    m_agcCnt.clear();
+    m_jamInd.clear();
+    m_ofsI.clear();
+    m_magI.clear();
+    m_ofsQ.clear();
+    m_magQ.clear();
+
     for (size_t i = 0; i < m_nBlocks; ++i)
     {
       m_blockId.push_back(message[10 + (i * 24)]);
