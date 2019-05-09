@@ -305,6 +305,56 @@ bool rf::type(std::vector<uint8_t>& message)
       && message[3] == ubx::msg_map.at("MON").second.at("RF"));
 }
 
+ver::ver(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void ver::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    std::array<uint8_t, 30> temp;
+
+    std::memcpy(m_swVersion.data(), &message[6], 30);
+    std::memcpy(m_hwVersion.data(), &message[36], 10);
+
+    m_extension.clear();
+
+    for (size_t i = 46; i < message.size(); i = i + 30)
+    {
+      std::memcpy(temp.data(), &message[i], 30);
+
+      m_extension.push_back(temp);
+    }
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+std::array<uint8_t, 30> ver::swVersion()
+{
+  return m_swVersion;
+}
+
+std::array<uint8_t, 10> ver::hwVersion()
+{
+  return m_hwVersion;
+}
+
+std::vector<std::array<uint8_t, 30>> ver::extension()
+{
+  return m_extension;
+}
+
+bool ver::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("MON").first
+      && message[3] == ubx::msg_map.at("MON").second.at("VER"));
+}
+
 } // namespace mon
 
 } // namespace ubx

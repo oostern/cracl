@@ -171,6 +171,30 @@ public:
 
 }; // ubx::mon::rf
 
+class ver
+{
+  std::array<uint8_t, 30> m_swVersion;
+  std::array<uint8_t, 10> m_hwVersion;
+
+  std::vector<std::array<uint8_t, 30>> m_extension;
+
+public:
+  ver(){ };
+
+  ver(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  std::array<uint8_t, 30> swVersion();
+
+  std::array<uint8_t, 10> hwVersion();
+
+  std::vector<std::array<uint8_t, 30>> extension();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::mon::ver
+
 } // namespace mon
 
 } // namespace ubx
