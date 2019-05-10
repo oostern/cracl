@@ -215,6 +215,72 @@ bool posecef::type(std::vector<uint8_t>& message)
       && message[3] == ubx::msg_map.at("NAV").second.at("POSECEF"));
 }
 
+posllh::posllh(std::vector<uint8_t>& message)
+{
+  update(message);
+}
+
+void posllh::update(std::vector<uint8_t>& message)
+{
+  if (type(message))
+  {
+    m_iTOW = (*(reinterpret_cast<uint32_t*> (&message[6])));
+
+    m_lon = (*(reinterpret_cast<int32_t*> (&message[10])));
+    m_lat = (*(reinterpret_cast<int32_t*> (&message[14])));
+    m_height = (*(reinterpret_cast<int32_t*> (&message[18])));
+    m_hMSL = (*(reinterpret_cast<int32_t*> (&message[22])));
+
+    m_hAcc = (*(reinterpret_cast<uint32_t*> (&message[26])));
+    m_vAcc = (*(reinterpret_cast<uint32_t*> (&message[30])));
+  }
+  else
+    throw std::runtime_error("Message type mismatch");
+}
+
+uint32_t posllh::iTOW()
+{
+  return m_iTOW;
+}
+
+int32_t posllh::lon()
+{
+  return m_lon;
+}
+
+int32_t posllh::lat()
+{
+  return m_lat;
+}
+
+int32_t posllh::height()
+{
+  return m_height;
+}
+
+int32_t posllh::hMSL()
+{
+  return m_hMSL;
+}
+
+uint32_t posllh::hAcc()
+{
+  return m_hAcc;
+}
+
+uint32_t posllh::vAcc()
+{
+  return m_vAcc;
+}
+
+bool posllh::type(std::vector<uint8_t>& message)
+{
+  return (!message.empty()
+      && valid_checksum(message)
+      && message[2] == ubx::msg_map.at("NAV").first
+      && message[3] == ubx::msg_map.at("NAV").second.at("POSLLH"));
+}
+
 sat::sat(std::vector<uint8_t>& message)
 {
   update(message);

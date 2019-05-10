@@ -135,6 +135,43 @@ public:
 
 }; // ubx::nav::posecef
 
+class posllh
+{
+  uint32_t m_iTOW;
+
+  int32_t m_lon;
+  int32_t m_lat;
+  int32_t m_height;
+  int32_t m_hMSL;
+
+  uint32_t m_hAcc;
+  uint32_t m_vAcc;
+
+public:
+  posllh(){ }
+
+  posllh(std::vector<uint8_t>& message);
+
+  void update(std::vector<uint8_t>& message);
+
+  uint32_t iTOW();
+
+  int32_t lon();
+
+  int32_t lat();
+
+  int32_t height();
+
+  int32_t hMSL();
+
+  uint32_t hAcc();
+
+  uint32_t vAcc();
+
+  static bool type(std::vector<uint8_t>& message);
+
+}; // ubx::nav::posllh
+
 class sat
 {
   uint32_t m_iTOW;
