@@ -37,14 +37,6 @@ class firefly_1a : public device
   std::deque<std::vector<uint8_t>> m_nmea_buffer;
   std::deque<std::vector<uint8_t>> m_scpi_buffer;
 
-  //void add_pubx_payload(std::vector<char> &message) { }
-
-  //template <typename... Args>
-  //void add_pubx_payload(std::vector<char> &message, const char* t, Args... args)
-
-  //template <typename T, typename... Args>
-  //void add_pubx_payload(std::vector<char> &message, T t, Args... args)
-
   void buffer_messages();
 
 public:
@@ -120,10 +112,6 @@ public:
    */
   void gps_gprmc(size_t freq);
 
-  /* @brief Function to query the position and velocity of the GPS receiver
-   */
-  void gps_pos();
-
   /* @brief Function to instruct teh GPSDO to transmit X, Y, and Z speed
    *        including centimeter-level accuracy estimates at a specified
    *        frequency
@@ -135,6 +123,10 @@ public:
    *        should be output
    */
   void gps_xyzsp(size_t freq);
+
+  /* @brief Function to query the position and velocity of the GPS receiver
+   */
+  void gps_pos();
 
   /* @brief Function to return information about time, including date, time in
    *        UTC, timezone, and time shift between the GPSDO and GPS time
