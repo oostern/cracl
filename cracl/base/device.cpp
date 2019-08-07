@@ -1,4 +1,5 @@
 // Copyright (C) 2019 Colton Riedel
+//               2019 William Bogardus
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,7 +34,7 @@ namespace cracl
 {
 
 device::device(const std::string& location, size_t baud_rate, size_t timeout,
-    size_t char_size, std::string delim,size_t max_handlers,
+    size_t char_size, std::string delim, size_t max_handlers,
     port_base::parity::type parity, port_base::flow_control::type flow_control,
     port_base::stop_bits::type stop_bits)
   : m_timeout(timeout), m_max_handlers(max_handlers), m_location(location),
@@ -123,7 +124,7 @@ void device::flush_handlers()
   //   process from being interleaved
 
   // Manually destruct port
-  m_port.~basic_serial_port();
+  m_port.boost::asio::serial_port::~serial_port();
 
   // Manually destruct timer
   m_timer.~basic_deadline_timer();
@@ -132,7 +133,8 @@ void device::flush_handlers()
   //   lifecycle. Destructing io_serice results in the destruction of stored
   //   handlers from previous read and write operations, which would otherwise
   //   grow without bound
-  m_io.~io_service();
+  m_io.boost::asio::io_service::~io_service();
+    //m_io.reset();
   new (&m_io) boost::asio::io_service();
 
   // Manually re-construct port with new io_service
@@ -152,7 +154,7 @@ void device::flush_handlers()
 
   // Manually re-construct timer with new io_service
   new (&m_timer) boost::asio::deadline_timer(m_io);
-}
+  }
 
 void device::baud_rate(size_t baud_rate)
 {

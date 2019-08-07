@@ -1,7 +1,7 @@
-CXX=g++
+CXX=g++-7
 CXXFLAGS=-std=c++14 -O3 -Wall -Werror
 CXXINCLUDE=-I /usr/include -I.
-LDFLAGS=-L/usr/lib/arm-linux-gnu
+LDFLAGS=-L/usr/lib/arm-linux-gnueabihf
 LDLIBS=-lboost_system -lpthread -lrt
 
 DEPS=cracl/base/device.hpp \
@@ -18,7 +18,7 @@ TEST_SRCS=$(wildcard tests/*.cc)
 TESTS=$(TEST_SRCS:%.cc=%.elf)
 
 %.o: %.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $< $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(CXXINCLUDE) -c -o $@ $< $(LDFLAGS) $(LDLIBS)
 
 lib: $(OBJS)
 	ar rs libCracl.a $(OBJS)
