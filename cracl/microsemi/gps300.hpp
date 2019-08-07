@@ -37,14 +37,6 @@ class gps300 : public device
   std::deque<std::vector<uint8_t>> m_nmea_buffer;
   std::deque<std::vector<uint8_t>> m_scpi_buffer;
 
-  //void add_pubx_payload(std::vector<char> &message); { }
-
-  //template <typename... Args>
-  //void add_pubx_payload(std::vector<char> &message, const char* t, Args... args);
-
-  //template <typename T, typename... Args>
-  //void add_pubx_payload(std::vector<char> &message, T t, Args... args);
-
   void buffer_messages();
 
 public:
@@ -66,9 +58,6 @@ public:
   void flush_nmea();
 
   void flush_scpi();
-
-  //template <typename... Args>
-  //void scpi_send(std::string&& msg_id, Args... args);
 
   /* @brief Function to query the configuration, position, speed, height, and
    *        other relevant data of the integrated GPS receiver
