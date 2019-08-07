@@ -134,7 +134,6 @@ void device::flush_handlers()
   //   handlers from previous read and write operations, which would otherwise
   //   grow without bound
   m_io.boost::asio::io_service::~io_service();
-    //m_io.reset();
   new (&m_io) boost::asio::io_service();
 
   // Manually re-construct port with new io_service
@@ -154,7 +153,7 @@ void device::flush_handlers()
 
   // Manually re-construct timer with new io_service
   new (&m_timer) boost::asio::deadline_timer(m_io);
-  }
+}
 
 void device::baud_rate(size_t baud_rate)
 {

@@ -1,4 +1,4 @@
-CXX=g++-7
+CXX=g++
 CXXFLAGS=-std=c++14 -O3 -Wall -Werror
 CXXINCLUDE=-I /usr/include -I.
 LDFLAGS=-L/usr/lib/arm-linux-gnueabihf
@@ -18,7 +18,7 @@ TEST_SRCS=$(wildcard tests/*.cc)
 TESTS=$(TEST_SRCS:%.cc=%.elf)
 
 %.o: %.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) $(CXXINCLUDE) -c -o $@ $< $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $< $(LDFLAGS) $(LDLIBS)
 
 lib: $(OBJS)
 	ar rs libCracl.a $(OBJS)

@@ -1,9 +1,0 @@
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/msg/class/nav.o cracl/ublox/msg/class/nav.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/msg/class/mon.o cracl/ublox/msg/class/mon.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/msg/base.o cracl/ublox/msg/base.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/msg/f9.o cracl/ublox/msg/f9.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/msg/m8.o cracl/ublox/msg/m8.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/base.o cracl/ublox/base.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/f9.o cracl/ublox/f9.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-g++-7 -std=c++14 -O3 -Wall -Werror -DBOOST_ASIO_HAS_SERIAL_PORT -I /usr/include -I. -c -o cracl/ublox/m8.o cracl/ublox/m8.cpp -L/usr/lib/arm-linux-gnueabihf -lboost_system -lpthread -lrt
-ar rs libCracl.a cracl/base/device.o cracl/microsemi/sa45s.o cracl/microsemi/gps300.o cracl/jackson_labs/firefly_1a.o cracl/ublox/msg/class/rxm.o cracl/ublox/msg/class/nav.o cracl/ublox/msg/class/mon.o cracl/ublox/msg/base.o cracl/ublox/msg/f9.o cracl/ublox/msg/m8.o cracl/ublox/base.o cracl/ublox/f9.o cracl/ublox/m8.o
