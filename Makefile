@@ -1,7 +1,6 @@
 CXX=g++
 CXXFLAGS=-std=c++14 -O3 -Wall -Werror
 CXXINCLUDE=-I /usr/include -I.
-LDFLAGS=-L/usr/lib/x86_64-linux-gnu
 LDLIBS=-lboost_system -lpthread -lrt
 
 DEPS=cracl/base/device.hpp \
