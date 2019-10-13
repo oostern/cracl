@@ -96,9 +96,13 @@ void gps300::buffer_messages()
     {
       message.push_back(current);
 
-      auto temp = read();
-
-      message.insert(message.begin() + 1, temp.begin(), temp.end());
+      while (current != 0x00          // Read_byte returns a value
+          && (message.size() < 4      // Short-circuit check for end of message
+            || !(message.at(message.size() - 1) == '\n'       // Terminating
+              && message.at(message.size() - 2) == '\r'       //   characters
+              && message.at(message.size() - 3) == '\n'       //   haven't been
+              && message.at(message.size() - 4) == '\r')))    //   read
+        message.push_back(current = read_byte());
 
       m_scpi_buffer.push_back(message);
 

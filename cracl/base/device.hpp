@@ -94,6 +94,7 @@ public:
 
   void write(const std::string& data);
 
+[[deprecated("Prefer use of ::read_byte to avoid unresolved read order isses")]]
   std::vector<uint8_t> read();
 
   std::vector<uint8_t> read(size_t size);
