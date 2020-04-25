@@ -1,22 +1,17 @@
-// Copyright (C) 2019 Colton Riedel
+// Copyright (C) 2020 Colton Riedel
 //
 // This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see https://www.gnu.org/licenses/
-//
-// If you are interested in obtaining a copy of this program under a
-// different license, or have other questions or comments, contact me at
-//
-//   coltonriedel at protonmail dot ch
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "rxm.hpp"
 
@@ -44,169 +39,59 @@ void measx::update(std::vector<uint8_t>& message)
 {
   if (type(message))
   {
-    m_version = message[6];
+    version = message[6];
 
-    m_gpsTOW = (*(reinterpret_cast<uint32_t*> (&message[10])));
-    m_gloTOW = (*(reinterpret_cast<uint32_t*> (&message[14])));
-    m_bdsTOW = (*(reinterpret_cast<uint32_t*> (&message[18])));
-    m_qzssTOW = (*(reinterpret_cast<uint32_t*> (&message[36])));
+    gpsTOW = (*(reinterpret_cast<uint32_t*> (&message[10])));
+    gloTOW = (*(reinterpret_cast<uint32_t*> (&message[14])));
+    bdsTOW = (*(reinterpret_cast<uint32_t*> (&message[18])));
+    qzssTOW = (*(reinterpret_cast<uint32_t*> (&message[36])));
 
-    m_gpsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[30])));
-    m_gloTOWacc = (*(reinterpret_cast<uint16_t*> (&message[32])));
-    m_bdsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[34])));
-    m_qzssTOWacc = (*(reinterpret_cast<uint16_t*> (&message[38])));
+    gpsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[30])));
+    gloTOWacc = (*(reinterpret_cast<uint16_t*> (&message[32])));
+    bdsTOWacc = (*(reinterpret_cast<uint16_t*> (&message[34])));
+    qzssTOWacc = (*(reinterpret_cast<uint16_t*> (&message[38])));
 
-    m_numSV = message[40];
-    m_towSet = message[41] & 0x03;
+    numSV = message[40];
+    towSet = message[41] & 0x03;
 
-    m_gnssId.clear();
-    m_svId.clear();
-    m_cNo.clear();
-    m_mpathIndic.clear();
-    m_dopplerMS.clear();
-    m_dopplerHz.clear();
-    m_wholeChips.clear();
-    m_fracChips.clear();
-    m_codePhase.clear();
-    m_intCodePhase.clear();
-    m_pseuRangeRMSErr.clear();
+    gnssId.clear();
+    svId.clear();
+    cNo.clear();
+    mpathIndic.clear();
+    dopplerMS.clear();
+    dopplerHz.clear();
+    wholeChips.clear();
+    fracChips.clear();
+    codePhase.clear();
+    intCodePhase.clear();
+    pseuRangeRMSErr.clear();
 
-    for (size_t i = 0; i < m_numSV; ++i)
+    for (size_t i = 0; i < numSV; ++i)
     {
-      m_gnssId.push_back(message[50 + (i * 24)]);
-      m_svId.push_back(message[51 + (i * 24)]);
-      m_cNo.push_back(message[52 + (i * 24)]);
-      m_mpathIndic.push_back(message[53 + (i * 24)]);
+      gnssId.push_back(message[50 + (i * 24)]);
+      svId.push_back(message[51 + (i * 24)]);
+      cNo.push_back(message[52 + (i * 24)]);
+      mpathIndic.push_back(message[53 + (i * 24)]);
 
-      m_dopplerMS.push_back(
+      dopplerMS.push_back(
           *(reinterpret_cast<int32_t*> (&message[54 + (i * 24)])));
-      m_dopplerHz.push_back(
+      dopplerHz.push_back(
           *(reinterpret_cast<int32_t*> (&message[58 + (i * 24)])));
 
-      m_wholeChips.push_back(
+      wholeChips.push_back(
           *(reinterpret_cast<uint16_t*> (&message[62 + (i * 24)])));
-      m_fracChips.push_back(
+      fracChips.push_back(
           *(reinterpret_cast<uint16_t*> (&message[64 + (i * 24)])));
 
-      m_codePhase.push_back(
+      codePhase.push_back(
           *(reinterpret_cast<uint32_t*> (&message[66 + (i * 24)])));
 
-      m_intCodePhase.push_back(message[70 + (i * 24)]);
-      m_pseuRangeRMSErr.push_back(message[71 + (i * 24)]);
+      intCodePhase.push_back(message[70 + (i * 24)]);
+      pseuRangeRMSErr.push_back(message[71 + (i * 24)]);
     }
   }
   else
     throw std::runtime_error("Message type mismatch");
-}
-
-uint8_t measx::version()
-{
-  return m_version;
-}
-
-uint32_t measx::gpsTOW()
-{
-  return m_gpsTOW;
-}
-
-uint32_t measx::gloTOW()
-{
-  return m_gloTOW;
-}
-
-uint32_t measx::bdsTOW()
-{
-  return m_bdsTOW;
-}
-
-uint32_t measx::qzssTOW()
-{
-  return m_qzssTOW;
-}
-
-uint16_t measx::gpsTOWacc()
-{
-  return m_gpsTOWacc;
-}
-
-uint16_t measx::gloTOWacc()
-{
-  return m_gloTOWacc;
-}
-
-uint16_t measx::bdsTOWacc()
-{
-  return m_bdsTOWacc;
-}
-
-uint16_t measx::qzssTOWacc()
-{
-  return m_qzssTOWacc;
-}
-
-uint8_t measx::numSV()
-{
-  return m_numSV;
-}
-
-uint8_t measx::towSet()
-{
-  return m_towSet;
-}
-
-std::vector<uint8_t> measx::gnssId()
-{
-  return m_gnssId;
-}
-
-std::vector<uint8_t> measx::svId()
-{
-  return m_svId;
-}
-
-std::vector<uint8_t> measx::cNo()
-{
-  return m_cNo;
-}
-
-std::vector<uint8_t> measx::mpathIndic()
-{
-  return m_mpathIndic;
-}
-
-std::vector<int32_t> measx::dopplerMS()
-{
-  return m_dopplerMS;
-}
-
-std::vector<int32_t> measx::dopplerHz()
-{
-  return m_dopplerHz;
-}
-
-std::vector<uint16_t> measx::wholeChips()
-{
-  return m_wholeChips;
-}
-
-std::vector<uint16_t> measx::fracChips()
-{
-  return m_fracChips;
-}
-
-std::vector<uint32_t> measx::codePhase()
-{
-  return m_codePhase;
-}
-
-std::vector<uint8_t> measx::intCodePhase()
-{
-  return m_intCodePhase;
-}
-
-std::vector<uint8_t> measx::pseuRangeRMSErr()
-{
-  return m_pseuRangeRMSErr;
 }
 
 bool measx::type(std::vector<uint8_t>& message)
@@ -226,156 +111,56 @@ void rawx::update(std::vector<uint8_t>& message)
 {
   if (type(message))
   {
-    m_rcvTow = (*(reinterpret_cast<double*> (&message[6])));
+    rcvTow = (*(reinterpret_cast<double*> (&message[6])));
 
-    m_week = (*(reinterpret_cast<uint16_t*> (&message[14])));
+    week = (*(reinterpret_cast<uint16_t*> (&message[14])));
 
-    m_leapS = (*(reinterpret_cast<int8_t*> (&message[16])));
+    leapS = (*(reinterpret_cast<int8_t*> (&message[16])));
 
-    m_numMeas = message[17];
-    m_recStat = message[12];
+    numMeas = message[17];
+    recStat = message[12];
 
-    m_leapSec = m_recStat & 0x01;
-    m_clkReset = m_recStat & 0x02;
+    leapSec = recStat & 0x01;
+    clkReset = recStat & 0x02;
 
-    m_prMes.clear();
-    m_cpMes.clear();
-    m_doMes.clear();
-    m_gnssId.clear();
-    m_svId.clear();
-    m_sigId.clear();
-    m_freqId.clear();
-    m_locktime.clear();
-    m_cno.clear();
-    m_prStdev.clear();
-    m_cpStdev.clear();
-    m_doStdev.clear();
-    m_trkStat.clear();
+    prMes.clear();
+    cpMes.clear();
+    doMes.clear();
+    gnssId.clear();
+    svId.clear();
+    sigId.clear();
+    freqId.clear();
+    locktime.clear();
+    cno.clear();
+    prStdev.clear();
+    cpStdev.clear();
+    doStdev.clear();
+    trkStat.clear();
 
-    for (size_t i = 0; i < m_numMeas; ++i)
+    for (size_t i = 0; i < numMeas; ++i)
     {
-      m_prMes.push_back(*(reinterpret_cast<double*> (&message[22 + (i * 32)])));
-      m_cpMes.push_back(*(reinterpret_cast<double*> (&message[30 + (i * 32)])));
+      prMes.push_back(*(reinterpret_cast<double*> (&message[22 + (i * 32)])));
+      cpMes.push_back(*(reinterpret_cast<double*> (&message[30 + (i * 32)])));
 
-      m_doMes.push_back(*(reinterpret_cast<float*> (&message[38 + (i * 32)])));
+      doMes.push_back(*(reinterpret_cast<float*> (&message[38 + (i * 32)])));
 
-      m_gnssId.push_back(message[42 + (i * 32)]);
-      m_svId.push_back(message[43 + (i * 32)]);
-      m_sigId.push_back(message[44 + (i * 32)]);
-      m_freqId.push_back(message[45 + (i * 32)]);
+      gnssId.push_back(message[42 + (i * 32)]);
+      svId.push_back(message[43 + (i * 32)]);
+      sigId.push_back(message[44 + (i * 32)]);
+      freqId.push_back(message[45 + (i * 32)]);
 
-      m_locktime.push_back(
+      locktime.push_back(
           *(reinterpret_cast<uint16_t*> (&message[46 + (i * 32)])));
 
-      m_cno.push_back(message[48 + (i * 32)]);
-      m_prStdev.push_back(message[49 + (i * 32)]);
-      m_cpStdev.push_back(message[50 + (i * 32)]);
-      m_doStdev.push_back(message[51 + (i * 32)]);
-      m_trkStat.push_back(message[52 + (i * 32)]);
+      cno.push_back(message[48 + (i * 32)]);
+      prStdev.push_back(message[49 + (i * 32)]);
+      cpStdev.push_back(message[50 + (i * 32)]);
+      doStdev.push_back(message[51 + (i * 32)]);
+      trkStat.push_back(message[52 + (i * 32)]);
     }
   }
   else
     throw std::runtime_error("Message type mismatch");
-}
-
-double rawx::rcvTow()
-{
-  return m_rcvTow;
-}
-
-uint16_t rawx::week()
-{
-  return m_week;
-}
-
-int8_t rawx::leapS()
-{
-  return m_leapS;
-}
-
-uint8_t rawx::numMeas()
-{
-  return m_numMeas;
-}
-
-uint8_t rawx::recStat()
-{
-  return m_recStat;
-}
-
-uint8_t rawx::leapSec()
-{
-  return m_leapSec;
-}
-
-uint8_t rawx::clkReset()
-{
-  return m_clkReset;
-}
-
-std::vector<double> rawx::prMes()
-{
-  return m_prMes;
-}
-
-std::vector<double> rawx::cpMes()
-{
-  return m_cpMes;
-}
-
-std::vector<float> rawx::doMes()
-{
-  return m_doMes;
-}
-
-std::vector<uint8_t> rawx::gnssId()
-{
-  return m_gnssId;
-}
-
-std::vector<uint8_t> rawx::svId()
-{
-  return m_svId;
-}
-
-std::vector<uint8_t> rawx::sigId()
-{
-  return m_sigId;
-}
-
-std::vector<uint8_t> rawx::freqId()
-{
-  return m_freqId;
-}
-
-std::vector<uint16_t> rawx::locktime()
-{
-  return m_locktime;
-}
-
-std::vector<uint8_t> rawx::cno()
-{
-  return m_cno;
-}
-
-std::vector<uint8_t> rawx::prStdev()
-{
-  return m_prStdev;
-}
-
-std::vector<uint8_t> rawx::cpStdev()
-{
-  return m_cpStdev;
-}
-
-std::vector<uint8_t> rawx::doStdev()
-{
-  return m_doStdev;
-}
-
-std::vector<uint8_t> rawx::trkStat()
-{
-  return m_trkStat;
 }
 
 bool rawx::type(std::vector<uint8_t>& message)
