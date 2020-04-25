@@ -1,22 +1,17 @@
-// Copyright (C) 2019 Colton Riedel
+// Copyright (C) 2020 Colton Riedel
 //
 // This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see https://www.gnu.org/licenses/
-//
-// If you are interested in obtaining a copy of this program under a
-// different license, or have other questions or comments, contact me at
-//
-//   coltonriedel at protonmail dot ch
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cracl/microsemi/sa45s.hpp>
 #include <cracl/jackson_labs/firefly_1a.hpp>
@@ -38,7 +33,7 @@ int main(int argc, char* argv[])
 
   auto res = c.read();
 
-  for ( auto i : res)
+  for (auto i : res)
     std::cout << i ;
   std::cout << std::endl;
 
@@ -48,7 +43,7 @@ int main(int argc, char* argv[])
 
   res = g.read();
 
-  for ( auto i : res)
+  for (auto i : res)
     std::cout << i ;
   std::cout << std::endl;
 
@@ -66,7 +61,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Spoof Status: ";
 
-    switch (parsed.spoofDetState())
+    switch (parsed.spoofDetState)
     {
       case 0: std::cout << "UNKNOWN" << std::endl; break;
       case 1: std::cout << "OKAY" << std::endl; break;
@@ -86,11 +81,11 @@ int main(int argc, char* argv[])
   {
     ubx::nav::sat parsed = ubx::nav::sat(nav_sat);
 
-    std::cout << "Num SVs: " << (int)parsed.numSvs() << std::endl;
+    std::cout << "Num SVs: " << static_cast<int>(parsed.numSvs) << std::endl;
 
-    for (size_t i = 0; i < parsed.numSvs(); ++i)
+    for (size_t i = 0; i < parsed.numSvs; ++i)
     {
-      switch (parsed.gnssId()[i])
+      switch (parsed.gnssId[i])
       {
         case 0: std::cout << "\t    GPS "; break;
         case 1: std::cout << "\t   SBAS "; break;
@@ -101,13 +96,13 @@ int main(int argc, char* argv[])
         case 6: std::cout << "\tGLONASS "; break;
       }
 
-      std::cout << (int)parsed.svId()[i]
-        << "\t\tUsed: " << (int)parsed.svUsed()[i]
-        << "\t\tCNO: " << (int)parsed.cno()[i]
-        << "\t\tResidual: " << ((int)parsed.prRes()[i] / 10.0)
+      std::cout << static_cast<int>(parsed.svId[i])
+        << "\t\tUsed: " << static_cast<int>(parsed.svUsed[i])
+        << "\t\tCNO: " << static_cast<int>(parsed.cno[i])
+        << "\t\tResidual: " << (static_cast<int>(parsed.prRes[i]) / 10.0)
         << "\t\tQuality: ";
 
-      switch (parsed.qualityInd()[i])
+      switch (parsed.qualityInd[i])
       {
         case 0: std::cout << "No Signal "; break;
         case 1: std::cout << "Searching"; break;

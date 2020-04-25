@@ -1,23 +1,18 @@
-// Copyright (C) 2019 Will Bogardus
-//               2019 Colton Riedel
+// Copyright (C) 2020 Colton Riedel
+//               2019 Will Bogardus
 //
 // This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see https://www.gnu.org/licenses/
-//
-// If you are interested in obtaining a copy of this program under a
-// different license, or have other questions or comments, contact me at
-//
-//   coltonriedel at protonmail dot ch
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cracl/ublox/m8.hpp>
 
@@ -43,21 +38,21 @@ int main(int argc, char* argv[])
   {
     ubx::nav::timebds parsed = ubx::nav::timebds(nav_timebds);
 
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "SOW: " << parsed.sow() << "s" << std::endl;
-    std::cout << "fSOW: " << parsed.fSOW() << "ns" << std::endl;
-    std::cout << "week: " << parsed.week() << std::endl;
-    std::cout << "leapS: " << static_cast<int>(parsed.leapS()) << "s"
+    std::cout << "iTOW: " << parsed.iTOW << "ms" << std::endl;
+    std::cout << "SOW: " << parsed.SOW << "s" << std::endl;
+    std::cout << "fSOW: " << parsed.fSOW << "ns" << std::endl;
+    std::cout << "week: " << parsed.week << std::endl;
+    std::cout << "leapS: " << static_cast<int>(parsed.leapS) << "s"
       << std::endl;
 
-    std::cout << "sowValid: " << static_cast<int>(parsed.sowValid())
+    std::cout << "sowValid: " << static_cast<int>(parsed.sowValid)
       << std::endl;
-    std::cout << "weekValid: " << static_cast<int>(parsed.weekValid())
+    std::cout << "weekValid: " << static_cast<int>(parsed.weekValid)
       << std::endl;
-    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid())
+    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid)
       << std::endl;
 
-    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc << "ns" << std::endl;
     std::cout << std::endl;
   }
   else std::cout << "Type error" << std::endl;
@@ -74,21 +69,21 @@ int main(int argc, char* argv[])
   {
     ubx::nav::timegal parsed = ubx::nav::timegal(nav_timegal);
 
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "galTow: " << parsed.galTow() << "s" << std::endl;
-    std::cout << "fGalTow: " << parsed.fGalTow() << "ns" << std::endl;
-    std::cout << "galWno: " << parsed.galWno() << std::endl;
-    std::cout << "leapS: " << static_cast<int>(parsed.leapS()) << "s"
+    std::cout << "iTOW: " << parsed.iTOW << "ms" << std::endl;
+    std::cout << "galTow: " << parsed.galTow << "s" << std::endl;
+    std::cout << "fGalTow: " << parsed.fGalTow << "ns" << std::endl;
+    std::cout << "galWno: " << parsed.galWno << std::endl;
+    std::cout << "leapS: " << static_cast<int>(parsed.leapS) << "s"
       << std::endl;
 
-    std::cout << "galTowValid: " << static_cast<int>(parsed.galTowValid())
+    std::cout << "galTowValid: " << static_cast<int>(parsed.galTowValid)
       << std::endl;
-    std::cout << "galWnoValid: " << static_cast<int>(parsed.galWnoValid())
+    std::cout << "galWnoValid: " << static_cast<int>(parsed.galWnoValid)
       << std::endl;
-    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid())
+    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid)
       << std::endl;
 
-    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc << "ns" << std::endl;
     std::cout << std::endl;
   }
   else std::cout << "Type error" << std::endl;
@@ -105,18 +100,18 @@ int main(int argc, char* argv[])
   {
     ubx::nav::timeglo parsed = ubx::nav::timeglo(nav_timeglo);
 
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "tod: " << parsed.tod() << "s" << std::endl;
-    std::cout << "fTOD: " << parsed.fTOD() << "ns" << std::endl;
-    std::cout << "nt: " << parsed.nt() << "days" << std::endl;
-    std::cout << "n4: " << static_cast<int>(parsed.n4()) << std::endl;
+    std::cout << "iTOW: " << parsed.iTOW << "ms" << std::endl;
+    std::cout << "TOD: " << parsed.TOD << "s" << std::endl;
+    std::cout << "fTOD: " << parsed.fTOD << "ns" << std::endl;
+    std::cout << "Nt: " << parsed.Nt << "days" << std::endl;
+    std::cout << "N4: " << static_cast<int>(parsed.N4) << std::endl;
 
-    std::cout << "todValid: " << static_cast<int>(parsed.todValid())
+    std::cout << "todValid: " << static_cast<int>(parsed.todValid)
       << std::endl;
-    std::cout << "dateValid: " << static_cast<int>(parsed.dateValid())
+    std::cout << "dateValid: " << static_cast<int>(parsed.dateValid)
       << std::endl;
 
-    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc << "ns" << std::endl;
     std::cout << std::endl;
   }
   else std::cout << "Type error" << std::endl;
@@ -133,20 +128,20 @@ int main(int argc, char* argv[])
   {
     ubx::nav::timegps parsed = ubx::nav::timegps(nav_timegps);
 
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "fTOD: " << parsed.fTOD() << "ns" << std::endl;
-    std::cout << "week: " << parsed.week() << std::endl;
-    std::cout << "leapS: " << static_cast<int>(parsed.leapS()) << "s"
+    std::cout << "iTOW: " << parsed.iTOW << "ms" << std::endl;
+    std::cout << "fTOD: " << parsed.fTOD << "ns" << std::endl;
+    std::cout << "week: " << parsed.week << std::endl;
+    std::cout << "leapS: " << static_cast<int>(parsed.leapS) << "s"
       << std::endl;
 
-    std::cout << "twoValid: " << static_cast<int>(parsed.towValid())
+    std::cout << "twoValid: " << static_cast<int>(parsed.towValid)
       << std::endl;
-    std::cout << "weekValid: " << static_cast<int>(parsed.weekValid())
+    std::cout << "weekValid: " << static_cast<int>(parsed.weekValid)
       << std::endl;
-    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid())
+    std::cout << "leapSValid: " << static_cast<int>(parsed.leapSValid)
       << std::endl;
 
-    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc << "ns" << std::endl;
 
     std::cout << std::endl;
   }
@@ -164,24 +159,24 @@ int main(int argc, char* argv[])
   {
     ubx::nav::timeutc parsed = ubx::nav::timeutc(nav_timeutc);
 
-    std::cout << "iTOW: " << parsed.iTOW() << "ms" << std::endl;
-    std::cout << "tAcc: " << parsed.tAcc() << "ns" << std::endl;
-    std::cout << "nano: " << parsed.nano() << std::endl;
-    std::cout << "year: " << parsed.year() << std::endl;
-    std::cout << "month: " << static_cast<int>(parsed.month()) << std::endl;
-    std::cout << "day: " << static_cast<int>(parsed.day()) << std::endl;
-    std::cout << "hour: " << static_cast<int>(parsed.hour()) << std::endl;
-    std::cout << "min: " << static_cast<int>(parsed.min()) << std::endl;
-    std::cout << "sec: " << static_cast<int>(parsed.sec()) << std::endl;
+    std::cout << "iTOW: " << parsed.iTOW << "ms" << std::endl;
+    std::cout << "tAcc: " << parsed.tAcc << "ns" << std::endl;
+    std::cout << "nano: " << parsed.nano << std::endl;
+    std::cout << "year: " << parsed.year << std::endl;
+    std::cout << "month: " << static_cast<int>(parsed.month) << std::endl;
+    std::cout << "day: " << static_cast<int>(parsed.day) << std::endl;
+    std::cout << "hour: " << static_cast<int>(parsed.hour) << std::endl;
+    std::cout << "min: " << static_cast<int>(parsed.min) << std::endl;
+    std::cout << "sec: " << static_cast<int>(parsed.sec) << std::endl;
 
-    std::cout << "validTOW: " << static_cast<int>(parsed.validTOW())
+    std::cout << "validTOW: " << static_cast<int>(parsed.validTOW)
       << std::endl;
-    std::cout << "validWKN: " << static_cast<int>(parsed.validWKN())
+    std::cout << "validWKN: " << static_cast<int>(parsed.validWKN)
       << std::endl;
-    std::cout << "validUTC: " << static_cast<int>(parsed.validUTC())
+    std::cout << "validUTC: " << static_cast<int>(parsed.validUTC)
       << std::endl;
 
-    switch (parsed.utcStandard())
+    switch (parsed.utcStandard)
     {
       case  0: std::cout << "Information not available" << std::endl;
                break;
